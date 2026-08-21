@@ -1,0 +1,117 @@
+# =========================
+# Dependencies
+# =========================
+node_modules/
+.venv/
+venv/
+env/
+
+# =========================
+# Environment Variables
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Build / Cache
+# =========================
+.next/
+dist/
+build/
+.cache/
+.tmp/
+.temp/
+
+# =========================
+# React Native / Expo
+# =========================
+.expo/
+.expo-shared/
+.metro-health-check*
+*.jks
+*.keystore
+
+# Expo / EAS local files
+.eas/
+eas-build-local/
+android/.gradle/
+android/app/build/
+android/build/
+ios/Pods/
+ios/build/
+
+# =========================
+# Python / FastAPI
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# =========================
+# Logs
+# =========================
+*.log
+logs/
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# IDE / Editors
+# =========================
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+.idea/
+*.iml
+
+# =========================
+# OS Files
+# =========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =========================
+# Coverage
+# =========================
+coverage/
+htmlcov/
+.coverage
+.coverage.*
+
+# =========================
+# Database / Local Files
+# =========================
+*.sqlite
+*.sqlite3
+*.db
+
+# =========================
+# Secrets / Certificates
+# =========================
+*.pem
+*.key
+*.crt
+secrets/
+credentials/
+
+# =========================
+# Temporary files
+# =========================
+*.swp
+*.swo
+*~

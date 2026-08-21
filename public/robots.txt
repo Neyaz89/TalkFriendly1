@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /ai
+Disallow: /journal
+Disallow: /profile
+Disallow: /settings
+
+Sitemap: https://talkfriendly.app/sitemap.xml

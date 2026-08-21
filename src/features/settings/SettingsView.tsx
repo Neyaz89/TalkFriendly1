@@ -77,7 +77,7 @@ function SettingRow({
 
 // ─── Main view ────────────────────────────────────────────────────────────────
 export function SettingsView() {
-  const { logout } = useAuth();
+  const { signOut } = useAuth();
   const { theme, showBorders, toggleTheme, toggleBorders } = useTheme();
   const isDark = theme === 'dark';
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -143,7 +143,7 @@ export function SettingsView() {
 
   const handleDeleteAccount = async () => {
     await profileService.deleteAccount();
-    await logout();
+    await signOut();
   };
 
   if (isLoading || !profile) {
@@ -317,7 +317,7 @@ export function SettingsView() {
               iconColor="text-muted"
               label="Sign Out"
               description="Sign out of your account"
-              onClick={logout}
+              onClick={signOut}
             />
 
             {/* Delete account */}

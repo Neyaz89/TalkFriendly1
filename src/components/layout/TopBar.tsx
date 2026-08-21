@@ -2,6 +2,7 @@
 
 /**
  * Top bar for mobile screens — logo, notifications, and avatar.
+ * Updated to use Supabase user_metadata for avatar and name.
  */
 
 import React from "react";

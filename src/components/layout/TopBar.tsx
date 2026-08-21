@@ -38,7 +38,11 @@ export function TopBar() {
         </button>
         <NotificationBell />
         <Link href={ROUTES.PROFILE} className="ml-1">
-          <Avatar src={user?.avatar} name={user?.name || ""} size="sm" />
+          <Avatar 
+            src={user?.user_metadata?.avatar_url} 
+            name={user?.user_metadata?.full_name || user?.email || ""} 
+            size="sm" 
+          />
         </Link>
       </div>
     </header>

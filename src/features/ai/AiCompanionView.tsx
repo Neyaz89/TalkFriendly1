@@ -35,10 +35,11 @@ export function AiCompanionView() {
 
   /* ── Initial greeting ── */
   useEffect(() => {
+    const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || '';
     const greeting: ChatMessage = {
       id: "greeting",
       role: "assistant",
-      content: `Hello${user?.name ? `, ${user.name.split(" ")[0]}` : ""}! I'm your TalkFriendly companion — here to listen without judgment and help you explore what's on your mind. How are you feeling today?`,
+      content: `Hello${userName ? `, ${userName.split(" ")[0]}` : ""}! I'm your TalkFriendly companion — here to listen without judgment and help you explore what's on your mind. How are you feeling today?`,
       timestamp: new Date().toISOString(),
       suggestions: [
         "I'm feeling anxious",
@@ -211,8 +212,8 @@ export function AiCompanionView() {
               <ChatBubble
                 key={msg.id}
                 message={msg}
-                userAvatar={user?.avatar}
-                userName={user?.name ?? ""}
+                userAvatar={user?.user_metadata?.avatar_url}
+                userName={user?.user_metadata?.full_name || user?.email || ""}
                 onSuggestionClick={sendMessage}
               />
             ))}

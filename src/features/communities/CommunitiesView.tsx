@@ -13,8 +13,6 @@ import {
   Lock,
   Plus,
   X,
-  Image as ImageIcon,
-  Globe,
   Shield,
   MessageSquare,
   Mic,
@@ -71,6 +69,7 @@ export function CommunitiesView() {
 
   useEffect(() => {
     loadCommunities();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategory, search, showJoined]);
 
   const loadCommunities = async () => {
@@ -98,8 +97,9 @@ export function CommunitiesView() {
       }
       // Refresh the community to get updated member status
       await loadCommunities();
-    } catch (error: any) {
-      alert(error.message || "Failed to join/leave community");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to join/leave community";
+      alert(message);
     }
   };
 
@@ -375,8 +375,9 @@ function CreateCommunityModal({
           require_approval: false,
         },
       });
-    } catch (err: any) {
-      setError(err.message || "Failed to create community");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to create community";
+      setError(message);
     } finally {
       setIsSubmitting(false);
     }

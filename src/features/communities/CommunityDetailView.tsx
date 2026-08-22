@@ -5,8 +5,8 @@
  * Complete chat interface with real-time messages, voice recording, and admin controls.
  */
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import {
   ArrowLeft,
   Send,
@@ -14,10 +14,8 @@ import {
   Users,
   Settings,
   Search,
-  MoreVertical,
   Reply,
   Trash2,
-  Edit2,
   X,
   Play,
   Pause,
@@ -39,7 +37,7 @@ import type {
   CommunityPermissions,
 } from "@/types";
 import { ROUTES } from "@/constants";
-import { formatDate, timeAgo } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
@@ -71,6 +69,7 @@ export function CommunityDetailView({ communityId }: CommunityDetailViewProps) {
         messageService.unsubscribeFromMessages(channelRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [communityId]);
 
   const loadCommunityData = async () => {
@@ -177,8 +176,9 @@ export function CommunityDetailView({ communityId }: CommunityDetailViewProps) {
                   community_id: communityId,
                 });
                 await loadCommunityData();
-              } catch (error: any) {
-                alert(error.message || "Failed to join community");
+              } catch (error) {
+                const message = error instanceof Error ? error.message : "Failed to join community";
+                alert(message);
               }
             }}
           >
@@ -339,7 +339,6 @@ function ChatView({
   const { user } = useAuth();
   const [inputText, setInputText] = useState("");
   const [replyingTo, setReplyingTo] = useState<CommunityMessage | null>(null);
-  const [editingMessage, setEditingMessage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
 
@@ -520,7 +519,6 @@ function MessageBubble({
   onReply,
   onDelete,
 }: MessageBubbleProps) {
-  const [showMenu, setShowMenu] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -647,15 +645,15 @@ function MessageBubble({
 
 interface MembersViewProps {
   communityId: string;
-  canManage: boolean;
 }
 
-function MembersView({ communityId, canManage }: MembersViewProps) {
+function MembersView({ communityId }: MembersViewProps) {
   const [members, setMembers] = useState<CommunityMemberWithProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadMembers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [communityId]);
 
   const loadMembers = async () => {
@@ -807,8 +805,9 @@ function GeneralSettings({
       onUpdate({ ...community, ...updated });
       setSaveMessage("Settings saved successfully!");
       setTimeout(() => setSaveMessage(""), 3000);
-    } catch (error: any) {
-      setSaveMessage(error.message || "Failed to save settings");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to save settings";
+      setSaveMessage(message);
     } finally {
       setIsSaving(false);
     }
@@ -1045,12 +1044,12 @@ function GeneralSettings({
 
 function MemberManagement({ community }: { community: Community }) {
   const [members, setMembers] = useState<CommunityMemberWithProfile[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [showInviteModal, setShowInviteModal] = useState(false);
 
   useEffect(() => {
     loadMembers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [community.id]);
 
   const loadMembers = async () => {
@@ -1061,8 +1060,6 @@ function MemberManagement({ community }: { community: Community }) {
       setMembers(data.members);
     } catch (error) {
       console.error("Failed to load members:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -1070,11 +1067,12 @@ function MemberManagement({ community }: { community: Community }) {
     try {
       await communityService.updateMemberRole(community.id, {
         member_id: memberId,
-        role: newRole as any,
+        role: newRole as "owner" | "admin" | "member",
       });
       await loadMembers();
-    } catch (error: any) {
-      alert(error.message || "Failed to update role");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to update role";
+      alert(message);
     }
   };
 
@@ -1084,8 +1082,9 @@ function MemberManagement({ community }: { community: Community }) {
     try {
       await communityService.removeMember(community.id, memberId);
       await loadMembers();
-    } catch (error: any) {
-      alert(error.message || "Failed to remove member");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to remove member";
+      alert(message);
     }
   };
 
@@ -1210,8 +1209,9 @@ function InviteMemberModal({
       setTimeout(() => {
         onClose();
       }, 2000);
-    } catch (error: any) {
-      setMessage(error.message || "Failed to send invitation");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to send invitation";
+      setMessage(message);
     } finally {
       setIsSending(false);
     }
@@ -1296,8 +1296,9 @@ function DangerZone({ community }: { community: Community }) {
       setIsDeleting(true);
       await communityService.deleteCommunity(community.id);
       window.location.href = ROUTES.COMMUNITIES;
-    } catch (error: any) {
-      alert(error.message || "Failed to delete community");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to delete community";
+      alert(message);
       setIsDeleting(false);
     }
   };
@@ -1563,6 +1564,7 @@ function VoiceRecorderModal({
     if (isMaxDuration && recordingState === "recording") {
       stopRecording();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMaxDuration, recordingState]);
 
   return (

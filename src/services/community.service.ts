@@ -84,8 +84,8 @@ export const communityService = {
     // Enhance communities with membership info
     const communities: Community[] = (data || []).map((community: any) => {
       const userMembership = user
-        ? community.community_members?.find(
-            (m: any) => m.user_id === user.id
+        ? (community.community_members as Record<string, unknown>[])?.find(
+            (m) => (m.user_id as string) === user.id
           )
         : null;
 

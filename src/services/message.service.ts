@@ -8,7 +8,6 @@ import type {
   CommunityMessage,
   SendMessagePayload,
   MessageFilterParams,
-  MessageRealtimePayload,
 } from "@/types";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
@@ -343,7 +342,7 @@ export const messageService = {
           table: "community_messages",
           filter: `community_id=eq.${communityId}`,
         },
-        async (payload) => {
+        async (payload: { new: Record<string, unknown> }) => {
           // Fetch full message with profile data
           const { data } = await supabase
             .from("community_messages")
@@ -375,9 +374,9 @@ export const messageService = {
           table: "community_messages",
           filter: `community_id=eq.${communityId}`,
         },
-        async (payload) => {
+        async (payload: { new: Record<string, unknown> }) => {
           if (payload.new.is_deleted) {
-            onDelete(payload.new.id);
+            onDelete(payload.new.id as string);
           } else {
             // Fetch updated message
             const { data } = await supabase
@@ -405,8 +404,8 @@ export const messageService = {
           table: "community_messages",
           filter: `community_id=eq.${communityId}`,
         },
-        (payload) => {
-          onDelete(payload.old.id);
+        (payload: { old: Record<string, unknown> }) => {
+          onDelete(payload.old.id as string);
         }
       );
 
@@ -444,9 +443,9 @@ export const messageService = {
     channel
       .on("presence", { event: "sync" }, () => {
         const state = channel.presenceState();
-        Object.entries(state).forEach(([userId, presences]: [string, any[]]) => {
-          const presence = presences[0];
-          onTyping(userId, presence.username, presence.isTyping);
+        Object.entries(state).forEach(([userId, presences]) => {
+          const presence = (presences as Record<string, unknown>[])[0];
+          onTyping(userId, presence.username as string, presence.isTyping as boolean);
         });
       })
       .subscribe();
@@ -491,18 +490,18 @@ export const messageService = {
    * Add reaction to a message.
    * Note: Requires a message_reactions table (not implemented in schema yet).
    */
-  async addReaction(messageId: string, emoji: string): Promise<void> {
-    // TODO: Implement reactions table and logic
-    console.log("Reactions not yet implemented");
-  },
+  // async addReaction(messageId: string, emoji: string): Promise<void> {
+  //   // TODO: Implement reactions table and logic
+  //   console.log("Reactions not yet implemented");
+  // },
 
   /**
    * Remove reaction from a message.
    */
-  async removeReaction(messageId: string, emoji: string): Promise<void> {
-    // TODO: Implement reactions table and logic
-    console.log("Reactions not yet implemented");
-  },
+  // async removeReaction(messageId: string, emoji: string): Promise<void> {
+  //   // TODO: Implement reactions table and logic
+  //   console.log("Reactions not yet implemented");
+  // },
 
   // ============================================================================
   // Search and Filter

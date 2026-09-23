@@ -426,13 +426,13 @@ function CreateCommunityModal({
 
   const handleChange = (
     field: keyof CreateCommunityPayload,
-    value: any
+    value: string | boolean | Partial<typeof formData.settings>
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSettingChange = (
-    setting: keyof typeof formData.settings,
+    setting: 'allow_voice_messages' | 'allow_member_posts' | 'require_approval',
     value: boolean
   ) => {
     setFormData((prev) => ({

@@ -86,7 +86,7 @@ export const communityService = {
 
     // For each community, check if user is a member
     const communitiesWithMembership = await Promise.all(
-      (data || []).map(async (community: any) => {
+      (data || []).map(async (community: Community) => {
         if (!user) {
           return {
             ...community,

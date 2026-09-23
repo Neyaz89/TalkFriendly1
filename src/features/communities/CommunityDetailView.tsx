@@ -787,7 +787,13 @@ function GeneralSettings({
   community: Community;
   onUpdate: (community: Community) => void;
 }) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    description: string;
+    category: Community['category'];
+    is_private: boolean;
+    settings: Community['settings'];
+  }>({
     name: community.name,
     description: community.description,
     category: community.category,
@@ -879,7 +885,7 @@ function GeneralSettings({
           onChange={(e) =>
             setFormData((prev) => ({
               ...prev,
-              category: e.target.value as any,
+              category: e.target.value as Community['category'],
             }))
           }
           className="w-full px-4 py-3 rounded-xl border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"

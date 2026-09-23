@@ -113,9 +113,7 @@ export async function POST(request: Request) {
         message: error.message,
         details: error.details,
         hint: error.hint,
-        code: error.code,
-        status: error.status,
-        statusText: error.statusText
+        code: error.code
       })
       return NextResponse.json(
         { 

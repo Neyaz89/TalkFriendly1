@@ -238,9 +238,7 @@ export const communityService = {
           message: error.message,
           details: error.details,
           hint: error.hint,
-          code: error.code,
-          status: error.status,
-          statusText: error.statusText
+          code: error.code
         })
         throw error;
       }

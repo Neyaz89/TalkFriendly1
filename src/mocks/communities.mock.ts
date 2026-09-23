@@ -2,7 +2,7 @@
  * Mock community data for development.
  */
 
-import type { Community, CommunityPost } from "@/types";
+import type { Community } from "@/types";
 
 export const MOCK_COMMUNITIES: Community[] = [
   {
@@ -165,6 +165,8 @@ export const MOCK_COMMUNITIES: Community[] = [
   },
 ];
 
+// CommunityPost type doesn't exist - this mock is not used
+/*
 export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
   {
     id: "post_001",
@@ -214,3 +216,4 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     updatedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
   },
 ];
+*/

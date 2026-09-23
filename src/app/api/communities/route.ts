@@ -49,59 +49,102 @@ export async function GET(request: Request) {
 // Create a new community
 export async function POST(request: Request) {
   try {
+    console.log('=== COMMUNITY CREATION START ===')
     const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
+    console.log('Auth check:', { userId: user?.id, authError: authError?.message })
 
     if (authError || !user) {
+      console.log('❌ Authentication failed')
       return NextResponse.json(
         { error: 'Not authenticated' },
         { status: 401 }
       )
     }
 
-    const { name, description, category, avatar_url } = await request.json()
+    const body = await request.json()
+    console.log('Request body:', JSON.stringify(body, null, 2))
+    
+    const { 
+      name, 
+      description, 
+      category, 
+      avatar_url,
+      cover_url,
+      is_private,
+      settings
+    } = body
 
     if (!name || !category) {
+      console.log('❌ Validation failed: missing name or category')
       return NextResponse.json(
         { error: 'Name and category are required' },
         { status: 400 }
       )
     }
 
+    const insertData = {
+      name,
+      description,
+      category,
+      owner_id: user.id,
+      avatar_url,
+      cover_url,
+      is_private: is_private || false,
+      settings: settings || {
+        allow_voice_messages: true,
+        allow_member_posts: true,
+        require_approval: false,
+      },
+    }
+    console.log('Insert data:', JSON.stringify(insertData, null, 2))
+
     const { data: community, error } = await supabase
       .from('communities')
-      .insert({
-        name,
-        description,
-        category,
-        avatar_url,
-        member_count: 1,
-      })
+      .insert(insertData)
       .select()
       .single()
 
     if (error) {
+      console.error('❌ API Supabase insert error - FULL:', error)
+      console.error('❌ API Supabase insert error - STRINGIFIED:', JSON.stringify(error, null, 2))
+      console.error('❌ API Supabase insert error - DETAILS:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+        status: error.status,
+        statusText: error.statusText
+      })
       return NextResponse.json(
-        { error: error.message },
+        { 
+          error: error.message || 'Database error',
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        },
         { status: 400 }
       )
     }
 
-    // Add creator as a member
-    await supabase
-      .from('community_members')
-      .insert({
-        community_id: community.id,
-        user_id: user.id,
-        role: 'admin',
-      })
-
+    console.log('✅ Community created successfully:', community.id)
+    console.log('=== COMMUNITY CREATION END ===')
+    
+    // Database trigger automatically adds owner as member
     return NextResponse.json({ community }, { status: 201 })
   } catch (error) {
-    console.error('Community creation error:', error)
+    console.error('❌ Unexpected error in community creation:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const errorStack = error instanceof Error ? error.stack : undefined
+    console.error('Error stack:', errorStack)
+    
     return NextResponse.json(
-      { error: 'An unexpected error occurred' },
+      { 
+        error: 'An unexpected error occurred',
+        message: errorMessage,
+        stack: process.env.NODE_ENV === 'development' ? errorStack : undefined
+      },
       { status: 500 }
     )
   }

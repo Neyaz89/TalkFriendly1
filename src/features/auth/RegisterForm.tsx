@@ -20,11 +20,29 @@ const registerSchema = z
     email: z.string().email("Please enter a valid email"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
+    dateOfBirth: z.string().min(1, "Date of birth is required"),
+    ageConfirmed: z.boolean().refine((v) => v === true, "You must confirm you are 18 or older"),
     agreeToTerms: z.boolean().refine((v) => v === true, "You must agree to the terms"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
+  })
+  .refine((data) => {
+    // Validate age >= 18
+    if (!data.dateOfBirth) return false;
+    const birthDate = new Date(data.dateOfBirth);
+    const today = new Date();
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    const dayDiff = today.getDate() - birthDate.getDate();
+    
+    // Adjust age if birthday hasn't occurred this year
+    const actualAge = monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? age - 1 : age;
+    return actualAge >= 18;
+  }, {
+    message: "You must be at least 18 years old to use TalkFriendly",
+    path: ["dateOfBirth"],
   });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -43,7 +61,10 @@ export function RegisterForm() {
     watch,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { agreeToTerms: false },
+    defaultValues: { 
+      agreeToTerms: false,
+      ageConfirmed: false,
+    },
   });
 
   const emailValue = watch("email");
@@ -53,7 +74,7 @@ export function RegisterForm() {
       setError(null);
       // Extract username from name (or use email prefix as fallback)
       const username = data.name.toLowerCase().replace(/\s+/g, '_');
-      await signUp(data.email, data.password, username, data.name, data.profession);
+      await signUp(data.email, data.password, username, data.name, data.profession, data.dateOfBirth, data.ageConfirmed);
       setEmailSent(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -121,6 +142,20 @@ export function RegisterForm() {
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
         <Input label="Full name" type="text" placeholder="Alex Morgan" leftIcon={<User className="h-4 w-4" />} error={errors.name?.message} autoComplete="name" {...register("name")} />
         <Input label="Profession" type="text" placeholder="Student, Teacher, etc." leftIcon={<User className="h-4 w-4" />} error={errors.profession?.message} autoComplete="organization-title" {...register("profession")} />
+        
+        <div>
+          <label htmlFor="dateOfBirth" className="block text-sm font-medium text-text mb-2">
+            Date of Birth
+          </label>
+          <Input 
+            id="dateOfBirth"
+            type="date" 
+            error={errors.dateOfBirth?.message} 
+            {...register("dateOfBirth")} 
+          />
+          <p className="text-xs text-muted mt-1">You must be 18 or older to use TalkFriendly</p>
+        </div>
+
         <Input label="Email" type="email" placeholder="you@example.com" leftIcon={<Mail className="h-4 w-4" />} error={errors.email?.message} autoComplete="email" {...register("email")} />
         <Input label="Password" type={showPassword ? "text" : "password"} placeholder="Min 8 characters" leftIcon={<Lock className="h-4 w-4" />}
           rightIcon={
@@ -132,12 +167,20 @@ export function RegisterForm() {
         <Input label="Confirm password" type="password" placeholder="Repeat password" leftIcon={<Lock className="h-4 w-4" />} error={errors.confirmPassword?.message} autoComplete="new-password" {...register("confirmPassword")} />
 
         <label className="flex items-start gap-2 cursor-pointer">
+          <input type="checkbox" className="h-4 w-4 rounded border-border text-primary focus:ring-primary mt-0.5" {...register("ageConfirmed")} />
+          <span className="text-sm text-muted">
+            I confirm that I am 18 years of age or older
+          </span>
+        </label>
+        {errors.ageConfirmed && <p className="text-xs text-red-500 -mt-2">{errors.ageConfirmed.message}</p>}
+
+        <label className="flex items-start gap-2 cursor-pointer">
           <input type="checkbox" className="h-4 w-4 rounded border-border text-primary focus:ring-primary mt-0.5" {...register("agreeToTerms")} />
           <span className="text-sm text-muted">
             I agree to the{" "}
-            <a href="#" className="text-primary hover:underline">Terms of Service</a>{" "}
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Terms of Service</a>{" "}
             and{" "}
-            <a href="#" className="text-primary hover:underline">Privacy Policy</a>
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Privacy Policy</a>
           </span>
         </label>
         {errors.agreeToTerms && <p className="text-xs text-red-500 -mt-2">{errors.agreeToTerms.message}</p>}

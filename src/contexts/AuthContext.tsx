@@ -10,7 +10,7 @@ interface AuthContextType {
   session: Session | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<void>
-  signUp: (email: string, password: string, username?: string, fullName?: string, profession?: string) => Promise<void>
+  signUp: (email: string, password: string, username?: string, fullName?: string, profession?: string, dateOfBirth?: string, ageConfirmed?: boolean) => Promise<void>
   signOut: () => Promise<void>
   refreshUser: () => Promise<void>
 }
@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.refresh()
   }
 
-  const signUp = async (email: string, password: string, username?: string, fullName?: string, profession?: string) => {
+  const signUp = async (email: string, password: string, username?: string, fullName?: string, profession?: string, dateOfBirth?: string, ageConfirmed?: boolean) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -71,6 +71,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           username: username || email.split('@')[0],
           full_name: fullName || '',
           profession: profession || '',
+          date_of_birth: dateOfBirth || null,
+          age_confirmed: ageConfirmed || false,
         },
       },
     })
@@ -87,6 +89,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         full_name: fullName || '',
         email: email,
         profession: profession || '',
+        date_of_birth: dateOfBirth || null,
+        age_confirmed: ageConfirmed || false,
       })
     }
 

@@ -33,16 +33,12 @@ export const communityService = {
   async getCommunities(
     params?: CommunityFilterParams
   ): Promise<{ communities: Community[]; total: number }> {
+    console.log('=== GET COMMUNITIES START ===', params)
+    
+    // Simplified query without joins (joins are broken due to missing foreign keys)
     let query = supabase
       .from("communities")
-      .select(
-        `
-        *,
-        owner:profiles!owner_id(id, username, full_name, avatar_url),
-        community_members!inner(user_id, role)
-      `,
-        { count: "exact" }
-      );
+      .select("*", { count: "exact" });
 
     // Filter by category
     if (params?.category) {
@@ -74,35 +70,57 @@ export const communityService = {
 
     const { data, error, count } = await query;
 
-    if (error) throw error;
+    console.log('Communities query result:', { data, error, count })
+
+    if (error) {
+      console.error('Communities query error:', error)
+      throw error;
+    }
 
     // Get current user to check membership
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
-    // Enhance communities with membership info
-    const communities: Community[] = (data || []).map((community: any) => {
-      const userMembership = user
-        ? (community.community_members as Record<string, unknown>[])?.find(
-            (m) => (m.user_id as string) === user.id
-          )
-        : null;
+    console.log('Current user:', user?.id)
 
-      return {
-        ...community,
-        is_member: !!userMembership,
-        user_role: userMembership?.role as MemberRole | undefined,
-      };
-    });
+    // For each community, check if user is a member
+    const communitiesWithMembership = await Promise.all(
+      (data || []).map(async (community: any) => {
+        if (!user) {
+          return {
+            ...community,
+            is_member: false,
+          };
+        }
+
+        // Check membership separately
+        const { data: membership } = await supabase
+          .from("community_members")
+          .select("role")
+          .eq("community_id", community.id)
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        return {
+          ...community,
+          is_member: !!membership,
+          user_role: membership?.role as MemberRole | undefined,
+        };
+      })
+    );
+
+    console.log('Communities with membership:', communitiesWithMembership)
 
     // Filter by membership if requested
-    let filteredCommunities = communities;
+    let filteredCommunities = communitiesWithMembership;
     if (params?.is_member !== undefined) {
-      filteredCommunities = communities.filter(
+      filteredCommunities = communitiesWithMembership.filter(
         (c) => c.is_member === params.is_member
       );
     }
+
+    console.log('=== GET COMMUNITIES END ===')
 
     return {
       communities: filteredCommunities,
@@ -115,18 +133,21 @@ export const communityService = {
    * Returns a single community with full details.
    */
   async getCommunityById(id: string): Promise<Community> {
+    console.log('=== GET COMMUNITY BY ID START ===', id)
+    
+    // Simplified query without join
     const { data, error } = await supabase
       .from("communities")
-      .select(
-        `
-        *,
-        owner:profiles!owner_id(id, username, full_name, avatar_url, bio)
-      `
-      )
+      .select("*")
       .eq("id", id)
       .single();
 
-    if (error) throw error;
+    console.log('Community query result:', { data, error })
+
+    if (error) {
+      console.error('Community query error:', error)
+      throw error;
+    }
     if (!data) throw new Error("Community not found");
 
     // Get current user membership info
@@ -134,13 +155,17 @@ export const communityService = {
       data: { user },
     } = await supabase.auth.getUser();
 
+    console.log('Current user:', user?.id)
+
     if (user) {
       const { data: membership } = await supabase
         .from("community_members")
         .select("role, last_read_at")
         .eq("community_id", id)
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
+
+      console.log('User membership:', membership)
 
       return {
         ...data,
@@ -148,6 +173,8 @@ export const communityService = {
         user_role: membership?.role as MemberRole | undefined,
       };
     }
+
+    console.log('=== GET COMMUNITY BY ID END ===')
 
     return {
       ...data,
@@ -160,15 +187,22 @@ export const communityService = {
    * Creates a new community.
    */
   async createCommunity(payload: CreateCommunityPayload): Promise<Community> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    console.log('=== SERVICE: createCommunity START ===')
+    console.log('Payload:', JSON.stringify(payload, null, 2))
+    
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (!user) throw new Error("User not authenticated");
+      console.log('User from service:', { userId: user?.id, email: user?.email })
 
-    const { data, error } = await supabase
-      .from("communities")
-      .insert({
+      if (!user) {
+        console.error('❌ User not authenticated in service')
+        throw new Error("User not authenticated");
+      }
+
+      const insertPayload = {
         name: payload.name,
         description: payload.description,
         category: payload.category,
@@ -181,17 +215,51 @@ export const communityService = {
           allow_member_posts: true,
           require_approval: false,
         },
-      })
-      .select()
-      .single();
+      }
+      
+      console.log('Service insert payload:', JSON.stringify(insertPayload, null, 2))
+      console.log('About to call supabase.from("communities").insert()...')
 
-    if (error) throw error;
+      // The migration adds owner_id automatically and triggers add the member
+      const { data, error } = await supabase
+        .from("communities")
+        .insert(insertPayload)
+        .select()
+        .single();
 
-    return {
-      ...data,
-      is_member: true,
-      user_role: "owner",
-    };
+      console.log('Supabase response received')
+      console.log('Data:', data)
+      console.log('Error:', error)
+
+      if (error) {
+        console.error('❌ Service Supabase error - FULL ERROR:', error)
+        console.error('❌ Service Supabase error - STRINGIFIED:', JSON.stringify(error, null, 2))
+        console.error('❌ Service Supabase error - DETAILS:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code,
+          status: error.status,
+          statusText: error.statusText
+        })
+        throw error;
+      }
+
+      console.log('✅ Service: Community created:', data.id)
+      console.log('=== SERVICE: createCommunity END ===')
+
+      // Trigger automatically adds owner as member with 'owner' role
+      return {
+        ...data,
+        is_member: true,
+        user_role: "owner",
+      };
+    } catch (err) {
+      console.error('❌ SERVICE: Exception caught:', err)
+      console.error('❌ SERVICE: Exception type:', typeof err)
+      console.error('❌ SERVICE: Exception stringified:', JSON.stringify(err, null, 2))
+      throw err;
+    }
   },
 
   /**
@@ -513,11 +581,16 @@ export const communityService = {
    * Get user permissions for a community.
    */
   async getPermissions(communityId: string): Promise<CommunityPermissions> {
+    console.log('=== GET PERMISSIONS START ===', communityId)
+    
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
+    console.log('User:', user?.id)
+
     if (!user) {
+      console.log('No user - returning all false permissions')
       return {
         can_send_messages: false,
         can_send_voice: false,
@@ -537,7 +610,10 @@ export const communityService = {
       .eq("user_id", user.id)
       .single();
 
+    console.log('Membership:', membership)
+
     if (!membership) {
+      console.log('No membership - returning all false permissions')
       return {
         can_send_messages: false,
         can_send_voice: false,
@@ -552,7 +628,9 @@ export const communityService = {
 
     const isOwner = membership.role === "owner";
     const isAdmin = membership.role === "admin" || isOwner;
-    const isMember = membership.role === "member" || isAdmin;
+    const isMember = true; // They have a membership record, so they're a member
+
+    console.log('Roles:', { isOwner, isAdmin, isMember, role: membership.role })
 
     // Get community settings
     const { data: community } = await supabase
@@ -561,13 +639,15 @@ export const communityService = {
       .eq("id", communityId)
       .single();
 
+    console.log('Community settings:', community?.settings)
+
     const settings = community?.settings || {
       allow_voice_messages: true,
       allow_member_posts: true,
       require_approval: false,
     };
 
-    return {
+    const permissions = {
       can_send_messages: isMember && settings.allow_member_posts,
       can_send_voice: isMember && settings.allow_voice_messages,
       can_edit_community: isAdmin,
@@ -577,6 +657,11 @@ export const communityService = {
       can_pin_messages: isAdmin,
       can_invite_members: isAdmin,
     };
+
+    console.log('Final permissions:', permissions)
+    console.log('=== GET PERMISSIONS END ===')
+
+    return permissions;
   },
 
   /**

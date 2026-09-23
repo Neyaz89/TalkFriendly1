@@ -7,11 +7,27 @@ import Image from "next/image";
 import { Heart } from "lucide-react";
 
 const FOOTER_LINKS = {
-  Product: ["Features", "Pricing", "Changelog", "Roadmap"],
-  Support: ["Help Center", "Contact", "Crisis Resources", "Community Guidelines"],
-  Company: ["About", "Blog", "Careers", "Press"],
+  Product: ["Features", "Pricing"],
+  Support: ["Help Centre", "Contact", "Community Guidelines"],
+  Company: ["About"],
   Legal: ["Privacy Policy", "Terms of Service", "Cookie Policy"],
 };
+
+// Map footer link text to actual routes
+function getLinkHref(linkText: string): string {
+  const linkMap: Record<string, string> = {
+    "Features": "#features",
+    "Pricing": "#pricing",
+    "Help Centre": "/help",
+    "Contact": "/contact",
+    "Community Guidelines": "/community-guidelines",
+    "About": "/about",
+    "Privacy Policy": "/privacy",
+    "Terms of Service": "/terms",
+    "Cookie Policy": "/cookies",
+  };
+  return linkMap[linkText] || "#";
+}
 
 export function LandingFooter() {
   return (
@@ -40,16 +56,19 @@ export function LandingFooter() {
             <div key={category}>
               <h3 className="text-sm font-semibold text-white mb-3">{category}</h3>
               <ul className="space-y-2" role="list">
-                {links.map((link) => (
-                  <li key={link}>
-                    <a
-                      href="#"
-                      className="text-sm text-gray-400 hover:text-white transition-colors"
-                    >
-                      {link}
-                    </a>
-                  </li>
-                ))}
+                {links.map((link) => {
+                  const href = getLinkHref(link);
+                  return (
+                    <li key={link}>
+                      <a
+                        href={href}
+                        className="text-sm text-gray-400 hover:text-white transition-colors"
+                      >
+                        {link}
+                      </a>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}

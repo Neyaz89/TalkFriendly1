@@ -9,6 +9,13 @@ export const APP_DESCRIPTION = "Your mental wellbeing companion — check in dai
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
+// Support Configuration
+export const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@talkfriendly.app";
+
+// Subscription Configuration
+export const FREE_LISTENER_SESSIONS_PER_MONTH = parseInt(process.env.NEXT_PUBLIC_FREE_LISTENER_SESSIONS_PER_MONTH || "2", 10);
+export const PREMIUM_PRICE_MONTHLY = parseInt(process.env.NEXT_PUBLIC_PREMIUM_PRICE_MONTHLY || "29", 10);
+
 export const ROUTES = {
   HOME: "/",
   LOGIN: "/auth/login",
@@ -34,6 +41,14 @@ export const ROUTES = {
   PROFILE: "/profile",
   PROFILE_EDIT: "/profile/edit",
   SETTINGS: "/settings",
+  // Legal & Support Pages
+  ABOUT: "/about",
+  HELP: "/help",
+  CONTACT: "/contact",
+  COMMUNITY_GUIDELINES: "/community-guidelines",
+  PRIVACY: "/privacy",
+  TERMS: "/terms",
+  COOKIES: "/cookies",
 } as const;
 
 export const NAVIGATION_ITEMS = [

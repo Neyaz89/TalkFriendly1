@@ -160,7 +160,7 @@ export function LandingHero() {
                 className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-full border border-gray-200 hover:border-primary transition-all text-sm shadow-sm"
               >
                 <Sparkles className="w-3.5 h-3.5 text-primary" />
-                <span className="font-medium text-black">Trusted by {formatUserCount(userCount)}+ users</span>
+                <span className="font-medium text-black">Join a growing community of happy users</span>
                 <ArrowRight className="w-3.5 h-3.5 text-gray-600" />
               </Link>
             </motion.div>
@@ -285,7 +285,7 @@ export function LandingHero() {
               <div className="p-6 space-y-6">
                 <div className="grid grid-cols-5 gap-2">
                   {[
-                    { emoji: "😔", label: "Struggling", value: "struggling" },
+                    { emoji: "😔", label: "Hard day", value: "struggling" },
                     { emoji: "😕", label: "Low", value: "low" },
                     { emoji: "😐", label: "Okay", value: "okay" },
                     { emoji: "🙂", label: "Good", value: "good" },

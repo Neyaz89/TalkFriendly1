@@ -93,7 +93,9 @@ export function CommunityDetailView({ communityId }: CommunityDetailViewProps) {
         await communityService.updateLastRead(communityId);
       }
     } catch (error) {
-      console.error("Failed to load community:", error);
+      console.error("Failed to load community - FULL ERROR:", error);
+      console.error("Failed to load community - STRINGIFIED:", JSON.stringify(error, null, 2));
+      console.error("Failed to load community - TYPE:", typeof error);
     } finally {
       setIsLoading(false);
     }

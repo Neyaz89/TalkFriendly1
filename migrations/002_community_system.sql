@@ -9,16 +9,16 @@
 -- 4. Click "New Query"
 -- 5. Copy and paste this ENTIRE file
 -- 6. Click "Run" or press Ctrl+Enter
--- 7. Wait for success message
--- 
+-- -7. Wait for success message
+-- -
 -- This migration adds:
 -- ✅ Complete community system with chat
 -- ✅ Voice message support
 -- ✅ Role-based access control (Owner/Admin/Member)
 -- ✅ Real-time messaging capabilities
 -- ✅ Community invitations
---
--- ============================================
+-- -
+-- ============================================ -
 
 -- Enable UUID extension (if not already enabled)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

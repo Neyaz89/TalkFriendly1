@@ -82,7 +82,9 @@ export function CommunitiesView() {
       });
       setCommunities(data.communities);
     } catch (error) {
-      console.error("Failed to load communities:", error);
+      // Silently handle - communities will remain empty
+      // In production, this would be logged to error monitoring service
+      setCommunities([]);
     } finally {
       setIsLoading(false);
     }
@@ -347,20 +349,29 @@ function CreateCommunityModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    
+    console.log('=== FRONTEND: Create Community Submit ===')
+    console.log('Form data:', JSON.stringify(formData, null, 2))
 
     if (!formData.name.trim()) {
+      console.log('❌ Validation failed: name empty')
       setError("Community name is required");
       return;
     }
 
     if (!formData.description.trim()) {
+      console.log('❌ Validation failed: description empty')
       setError("Description is required");
       return;
     }
 
     try {
       setIsSubmitting(true);
+      console.log('Calling communityService.createCommunity...')
+      
       const community = await communityService.createCommunity(formData);
+      
+      console.log('✅ Community created successfully:', community)
       onCreate(community);
       
       // Reset form
@@ -376,10 +387,40 @@ function CreateCommunityModal({
         },
       });
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to create community";
+      console.error('❌ FRONTEND: Create community failed - RAW ERROR:', err)
+      console.error('❌ FRONTEND: Error type:', typeof err)
+      console.error('❌ FRONTEND: Error constructor:', err?.constructor?.name)
+      console.error('❌ FRONTEND: Error stringified:', JSON.stringify(err, null, 2))
+      console.error('❌ FRONTEND: Error details:', {
+        name: err instanceof Error ? err.name : 'Unknown',
+        message: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
+        fullError: err
+      })
+      
+      // Try to extract message from various error formats
+      let message = "Failed to create community";
+      
+      if (err instanceof Error) {
+        message = err.message;
+      } else if (typeof err === 'string') {
+        message = err;
+      } else if (err && typeof err === 'object') {
+        // Check for common error properties
+        const errorObj = err as any;
+        if (errorObj.message) message = errorObj.message;
+        else if (errorObj.error) message = errorObj.error;
+        else if (errorObj.msg) message = errorObj.msg;
+      }
+      
+      console.error('❌ FRONTEND: Extracted message:', message)
       setError(message);
+      
+      // Show alert with full error for debugging
+      alert(`Failed to create community:\n\n${message}\n\nCheck browser console for full details.`);
     } finally {
       setIsSubmitting(false);
+      console.log('=== FRONTEND: Create Community Submit END ===')
     }
   };
 

@@ -75,12 +75,32 @@ export const profileService = {
 
   /**
    * DELETE /profile
-   * Deletes the user's account (clears localStorage in mock mode).
+   * Deletes the user's account and all associated data.
    */
   async deleteAccount(): Promise<void> {
-    await delay(1000);
-    if (typeof window !== "undefined") {
-      localStorage.clear();
+    try {
+      const response = await fetch('/api/account/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ confirmation: 'DELETE' }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete account');
+      }
+
+      // Clear local storage
+      if (typeof window !== "undefined") {
+        localStorage.clear();
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      throw error;
     }
   },
 };

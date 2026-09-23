@@ -19,7 +19,7 @@ import { ROUTES, MOOD_EMOJIS } from "@/constants";
 import Link from "next/link";
 
 const MOODS: { level: MoodLevel; emoji: string; label: string; color: string }[] = [
-  { level: 1, emoji: "😔", label: "Really Low", color: "#EF4444" },
+  { level: 1, emoji: "😔", label: "Having a hard day", color: "#EF4444" },
   { level: 2, emoji: "😕", label: "Low", color: "#F97316" },
   { level: 3, emoji: "😐", label: "Okay", color: "#F59E0B" },
   { level: 4, emoji: "🙂", label: "Good", color: "#22C55E" },

@@ -8,6 +8,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SUPPORT_EMAIL } from "@/constants";
 
 const FAQS = [
   {
@@ -32,7 +33,7 @@ const FAQS = [
   },
   {
     question: "What if I'm in a crisis?",
-    answer: "If you're experiencing a mental health crisis, please contact emergency services (911) or a crisis helpline such as 988 (Suicide & Crisis Lifeline). TalkFriendly includes crisis resources in the app and our team monitors for urgent situations.",
+    answer: "If you're in crisis or feel you may be in immediate danger, you're not alone. Please reach out to your local emergency services or an appropriate crisis support service in your country. TalkFriendly is not an emergency or crisis response service.",
   },
 ];
 
@@ -52,7 +53,7 @@ export function LandingFaq() {
             Frequently asked questions
           </h2>
           <p className="text-muted">
-            Can&apos;t find what you&apos;re looking for? <a href="mailto:hello@talkfriendly.app" className="text-primary hover:underline">Email us</a>
+            Can&apos;t find what you&apos;re looking for? <a href={`mailto:${SUPPORT_EMAIL}`} className="text-primary hover:underline">Email us</a>
           </p>
         </motion.div>
 

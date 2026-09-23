@@ -34,7 +34,7 @@ export const dashboardService = {
       journalCount: 47,
       upcomingCircles: MOCK_CIRCLES.slice(0, 2),
       recommendedListener: MOCK_LISTENERS[0],
-      recommendedCommunities: MOCK_COMMUNITIES.filter((c) => !c.isJoined).slice(0, 3),
+      recommendedCommunities: MOCK_COMMUNITIES.slice(0, 3),
       quickActions: [
         {
           id: "qa_001",

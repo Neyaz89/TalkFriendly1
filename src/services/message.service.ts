@@ -6,7 +6,7 @@
 import { createClient } from "@/lib/supabase/client";
 import type {
   CommunityMessage,
-  SendMessagePayload,
+  CommunitySendMessagePayload,
   MessageFilterParams,
 } from "@/types";
 import type { RealtimeChannel } from "@supabase/supabase-js";
@@ -72,7 +72,7 @@ export const messageService = {
    * POST /messages
    * Sends a new message to a community.
    */
-  async sendMessage(payload: SendMessagePayload): Promise<CommunityMessage> {
+  async sendMessage(payload: CommunitySendMessagePayload): Promise<CommunityMessage> {
     const {
       data: { user },
     } = await supabase.auth.getUser();

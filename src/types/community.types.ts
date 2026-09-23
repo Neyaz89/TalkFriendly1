@@ -99,7 +99,7 @@ export interface CommunityMessage {
 
 export type MessageType = "text" | "voice" | "system";
 
-export interface SendMessagePayload {
+export interface CommunitySendMessagePayload {
   community_id: string;
   content?: string;
   message_type: MessageType;

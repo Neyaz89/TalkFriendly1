@@ -647,9 +647,10 @@ function MessageBubble({
 
 interface MembersViewProps {
   communityId: string;
+  canManage: boolean;
 }
 
-function MembersView({ communityId }: MembersViewProps) {
+function MembersView({ communityId, canManage }: MembersViewProps) {
   const [members, setMembers] = useState<CommunityMemberWithProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 

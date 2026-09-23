@@ -19,6 +19,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   grief: "bg-gray-50 text-gray-600",
   parenting: "bg-green-50 text-green-600",
   gaming: "bg-indigo-50 text-indigo-600",
+  wellness: "bg-emerald-50 text-emerald-600",
   "weekly-reflection": "bg-primary-50 text-primary-600",
 };
 

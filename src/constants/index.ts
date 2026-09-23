@@ -81,6 +81,7 @@ export const COMMUNITY_CATEGORY_LABELS = {
   relationships: "Relationships",
   grief: "Grief & Loss",
   parenting: "Parenting",
+  wellness: "Wellness",
   "weekly-reflection": "Weekly Reflection",
   general: "General",
 } as const;

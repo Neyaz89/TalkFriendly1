@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { aiService } from "@/services/ai.service";
-import type { ChatMessage } from "@/types";
+import type { ChatMessage, SendMessagePayload as AiSendMessagePayload } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatDate } from "@/lib/utils";
 import { AiInsightsPanel } from "./AiInsightsPanel";
@@ -82,7 +82,7 @@ export function AiCompanionView() {
 
       try {
         await aiService.sendMessage(
-          { conversationId: activeConvId, message: text },
+          { conversationId: activeConvId, message: text } as AiSendMessagePayload,
           (chunk) => setStreamingText((prev) => prev + chunk),
           (msg) => {
             setMessages((prev) => [...prev, msg]);

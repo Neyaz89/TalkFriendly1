@@ -57,7 +57,7 @@ export function RecommendedCommunitiesCard({ communities }: RecommendedCommuniti
               <p className="text-xs text-muted leading-relaxed line-clamp-2">{community.description}</p>
               <div className="flex items-center gap-1 mt-3 text-muted">
                 <Users className="h-3 w-3" aria-hidden="true" />
-                <span className="text-xs">{community.memberCount.toLocaleString()} members</span>
+                <span className="text-xs">{community.member_count.toLocaleString()} members</span>
               </div>
             </Link>
           ))}

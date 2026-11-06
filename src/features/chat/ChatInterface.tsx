@@ -39,11 +39,11 @@ export function ChatInterface({ conversationId, onBack }: ChatInterfaceProps) {
     markAsRead();
 
     // Subscribe to new messages
-    const unsubscribe = chatService.subscribeToMessages(conversationId, (newMessage) => {
+    const unsubscribe = chatService.subscribeToConversation(conversationId, (newMessage) => {
       setMessages(prev => {
         const exists = prev.find(m => m.id === newMessage.id);
         if (exists) return prev;
-        return [...prev, newMessage];
+        return [...prev, newMessage as any]; // Cast to match MessageWithSender
       });
       
       // Mark as read when new message arrives

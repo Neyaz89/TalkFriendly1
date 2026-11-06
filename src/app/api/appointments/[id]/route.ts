@@ -16,11 +16,12 @@ import type {
 // GET /api/appointments/[id]
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const appointment = await appointmentService.getAppointmentById(
-      params.id,
+      id,
       true
     );
 
@@ -44,13 +45,14 @@ export async function GET(
 // PATCH /api/appointments/[id]
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body: UpdateAppointmentPayload = await request.json();
 
     const appointment = await appointmentService.updateAppointment(
-      params.id,
+      id,
       body,
       true
     );
@@ -68,13 +70,14 @@ export async function PATCH(
 // DELETE /api/appointments/[id] - Cancel appointment
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body: CancelAppointmentPayload = await request.json();
 
     const appointment = await appointmentService.cancelAppointment(
-      params.id,
+      id,
       body,
       true
     );

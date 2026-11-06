@@ -11,9 +11,10 @@ import type { SessionDuration } from '@/types';
 // GET /api/psychiatrists/[id]/availability
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const searchParams = request.nextUrl.searchParams;
     
     const date = searchParams.get('date');
@@ -28,7 +29,7 @@ export async function GET(
     }
 
     const slots = await appointmentService.getAvailableSlots(
-      params.id,
+      id,
       date,
       duration,
       timezone,

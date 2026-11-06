@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "Doctor Profile | TalkFriendly",
 };
 
-export default function DoctorProfilePage({ params }: { params: { id: string } }) {
-  return <DoctorProfileView doctorId={params.id} />;
+export default async function DoctorProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <DoctorProfileView doctorId={id} />;
 }

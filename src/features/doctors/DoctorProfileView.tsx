@@ -38,7 +38,7 @@ export function DoctorProfileView({ doctorId }: DoctorProfileViewProps) {
   const [reviews, setReviews] = useState<DoctorReviewWithReviewer[]>([]);
   const [loading, setLoading] = useState(true);
   const [showReviewDialog, setShowReviewDialog] = useState(false);
-  const { showToast } = useToast();
+  const { success, error } = useToast();
 
   useEffect(() => {
     loadDoctor();
@@ -51,7 +51,7 @@ export function DoctorProfileView({ doctorId }: DoctorProfileViewProps) {
       setDoctor(data);
     } catch (error: any) {
       console.error('Error loading doctor:', error);
-      showToast('error', error.message || 'Doctor not found');
+      error( error.message || 'Doctor not found');
     } finally {
       setLoading(false);
     }
@@ -73,7 +73,7 @@ export function DoctorProfileView({ doctorId }: DoctorProfileViewProps) {
       const canMessage = await doctorService.canMessageDoctor(doctorId);
       
       if (!canMessage) {
-        showToast('error', 'This doctor is not accepting messages at the moment');
+        error( 'This doctor is not accepting messages at the moment');
         return;
       }
 
@@ -92,7 +92,7 @@ export function DoctorProfileView({ doctorId }: DoctorProfileViewProps) {
       router.push(`/messages?conversation=${data.conversation.id}`);
     } catch (error: any) {
       console.error('Error creating conversation:', error);
-      showToast('error', error.message || 'Failed to start conversation');
+      error( error.message || 'Failed to start conversation');
     }
   };
 

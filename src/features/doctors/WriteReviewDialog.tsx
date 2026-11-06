@@ -27,11 +27,11 @@ export function WriteReviewDialog({
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { showToast } = useToast();
+  const { success, error } = useToast();
 
   const handleSubmit = async () => {
     if (rating === 0) {
-      showToast('error', 'Please select a rating');
+      error( 'Please select a rating');
       return;
     }
 
@@ -44,12 +44,12 @@ export function WriteReviewDialog({
         comment: comment.trim() || undefined,
       });
 
-      showToast('success', 'Review submitted successfully!');
+      success( 'Review submitted successfully!');
       onReviewSubmitted();
       handleClose();
     } catch (error: any) {
       console.error('Error submitting review:', error);
-      showToast('error', error.message || 'Failed to submit review');
+      error( error.message || 'Failed to submit review');
     } finally {
       setIsSubmitting(false);
     }

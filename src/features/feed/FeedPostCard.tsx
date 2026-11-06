@@ -47,7 +47,7 @@ export function FeedPostCard({ post, onDelete, onUpdate, onLikeToggle }: FeedPos
   const [isLoadingConnection, setIsLoadingConnection] = useState(false);
   const [showBlockDialog, setShowBlockDialog] = useState(false);
   const [showReportDialog, setShowReportDialog] = useState(false);
-  const { showToast } = useToast();
+  const { success, error } = useToast();
 
   const isOwnPost = post.author_id === user?.id;
 
@@ -80,11 +80,11 @@ export function FeedPostCard({ post, onDelete, onUpdate, onLikeToggle }: FeedPos
           receiver_id: post.author.id,
         });
         setConnectionStatus('pending');
-        showToast('success', 'Connection request sent!');
+        success( 'Connection request sent!');
       }
     } catch (error: any) {
       console.error('Error sending connection request:', error);
-      showToast('error', error.message || 'Failed to send request');
+      error( error.message || 'Failed to send request');
     } finally {
       setIsLoadingConnection(false);
     }
@@ -96,9 +96,9 @@ export function FeedPostCard({ post, onDelete, onUpdate, onLikeToggle }: FeedPos
     try {
       await feedService.deletePost(post.id);
       onDelete(post.id);
-      showToast('success', 'Post deleted');
+      success( 'Post deleted');
     } catch (error: any) {
-      showToast('error', error.message || 'Failed to delete post');
+      error( error.message || 'Failed to delete post');
     }
   };
 

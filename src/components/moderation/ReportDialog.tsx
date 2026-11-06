@@ -38,11 +38,11 @@ export function ReportDialog({
   const [selectedReason, setSelectedReason] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { showToast } = useToast();
+  const { success, error } = useToast();
 
   const handleSubmit = async () => {
     if (!selectedReason) {
-      showToast('error', 'Please select a reason');
+      error('Please select a reason');
       return;
     }
 
@@ -56,11 +56,11 @@ export function ReportDialog({
         description: description.trim() || undefined,
       });
 
-      showToast('success', 'Report submitted. We will review it shortly.');
+      success('Report submitted. We will review it shortly.');
       handleClose();
-    } catch (error: any) {
-      console.error('Error submitting report:', error);
-      showToast('error', error.message || 'Failed to submit report');
+    } catch (err: any) {
+      console.error('Error submitting report:', err);
+      error(err.message || 'Failed to submit report');
     } finally {
       setIsSubmitting(false);
     }

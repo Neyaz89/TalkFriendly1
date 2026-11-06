@@ -15,7 +15,7 @@ export function ConnectionRequestsCard() {
   const [requests, setRequests] = useState<ConnectionRequestWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
-  const { showToast } = useToast();
+  const { success, error } = useToast();
 
   useEffect(() => {
     loadRequests();
@@ -38,10 +38,10 @@ export function ConnectionRequestsCard() {
     try {
       await connectionService.acceptRequest(requestId);
       setRequests(prev => prev.filter(r => r.id !== requestId));
-      showToast('success', 'Connection request accepted!');
+      success( 'Connection request accepted!');
     } catch (error: any) {
       console.error('Error accepting request:', error);
-      showToast('error', error.message || 'Failed to accept request');
+      error( error.message || 'Failed to accept request');
     } finally {
       setProcessingIds(prev => {
         const next = new Set(prev);
@@ -57,10 +57,10 @@ export function ConnectionRequestsCard() {
     try {
       await connectionService.rejectRequest(requestId);
       setRequests(prev => prev.filter(r => r.id !== requestId));
-      showToast('success', 'Connection request rejected');
+      success( 'Connection request rejected');
     } catch (error: any) {
       console.error('Error rejecting request:', error);
-      showToast('error', error.message || 'Failed to reject request');
+      error( error.message || 'Failed to reject request');
     } finally {
       setProcessingIds(prev => {
         const next = new Set(prev);

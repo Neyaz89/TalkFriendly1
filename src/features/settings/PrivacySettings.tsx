@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { blockService } from "@/services/block.service";
-import type { BlockedUser } from "@/types";
+import type { BlockWithUser } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { PageLoader } from "@/components/common/LoadingSpinner";
@@ -18,10 +18,10 @@ import { useToast } from "@/hooks/useToast";
 import { formatDistanceToNow } from "date-fns";
 
 export function PrivacySettings() {
-  const [blockedUsers, setBlockedUsers] = useState<BlockedUser[]>([]);
+  const [blockedUsers, setBlockedUsers] = useState<BlockWithUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [unblocking, setUnblocking] = useState<string | null>(null);
-  const { showToast } = useToast();
+  const { success, error } = useToast();
 
   useEffect(() => {
     loadBlockedUsers();
@@ -29,11 +29,11 @@ export function PrivacySettings() {
 
   const loadBlockedUsers = async () => {
     try {
-      const data = await blockService.getBlockedUsers();
-      setBlockedUsers(data);
+      const { blocks } = await blockService.getBlockedUsers();
+      setBlockedUsers(blocks);
     } catch (error) {
       console.error('Error loading blocked users:', error);
-      showToast('error', 'Failed to load blocked users');
+      error( 'Failed to load blocked users');
     } finally {
       setLoading(false);
     }
@@ -46,11 +46,11 @@ export function PrivacySettings() {
 
     try {
       await blockService.unblockUser(userId);
-      setBlockedUsers(prev => prev.filter(u => u.blocked_user_id !== userId));
-      showToast('success', 'User unblocked successfully');
+      setBlockedUsers(prev => prev.filter(u => u.blocked_user?.id !== userId));
+      success( 'User unblocked successfully');
     } catch (error: any) {
       console.error('Error unblocking user:', error);
-      showToast('error', error.message || 'Failed to unblock user');
+      error( error.message || 'Failed to unblock user');
     } finally {
       setUnblocking(null);
     }

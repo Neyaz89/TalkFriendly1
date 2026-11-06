@@ -20,11 +20,11 @@ export function CreatePostCard({ onPostCreated }: CreatePostCardProps) {
   const [content, setContent] = useState("");
   const [visibility, setVisibility] = useState<'public' | 'connections' | 'private'>('public');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { showToast } = useToast();
+  const { success, error } = useToast();
 
   const handleSubmit = async () => {
     if (!content.trim()) {
-      showToast('error', 'Please write something to share');
+      error( 'Please write something to share');
       return;
     }
 
@@ -42,10 +42,10 @@ export function CreatePostCard({ onPostCreated }: CreatePostCardProps) {
       
       onPostCreated(completePost);
       setContent("");
-      showToast('success', 'Post shared successfully!');
+      success( 'Post shared successfully!');
     } catch (error: any) {
       console.error('Error creating post:', error);
-      showToast('error', error.message || 'Failed to create post');
+      error( error.message || 'Failed to create post');
     } finally {
       setIsSubmitting(false);
     }

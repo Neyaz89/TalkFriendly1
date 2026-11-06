@@ -22,7 +22,7 @@ export function PeopleTab() {
   const [filteredConnections, setFilteredConnections] = useState<ConnectionWithProfiles[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const { showToast } = useToast();
+  const { success, error } = useToast();
 
   useEffect(() => {
     loadConnections();
@@ -48,7 +48,7 @@ export function PeopleTab() {
       setFilteredConnections(peopleConnections);
     } catch (error) {
       console.error('Error loading connections:', error);
-      showToast('error', 'Failed to load connections');
+      error( 'Failed to load connections');
     } finally {
       setLoading(false);
     }
@@ -92,7 +92,7 @@ export function PeopleTab() {
       router.push(`/messages?conversation=${data.conversation.id}`);
     } catch (error: any) {
       console.error('Error creating conversation:', error);
-      showToast('error', error.message || 'Failed to start conversation');
+      error( error.message || 'Failed to start conversation');
     }
   };
 
@@ -102,10 +102,10 @@ export function PeopleTab() {
     try {
       await connectionService.removeConnection(connectionId);
       setConnections(prev => prev.filter(c => c.id !== connectionId));
-      showToast('success', 'Connection removed');
+      success( 'Connection removed');
     } catch (error: any) {
       console.error('Error removing connection:', error);
-      showToast('error', error.message || 'Failed to remove connection');
+      error( error.message || 'Failed to remove connection');
     }
   };
 

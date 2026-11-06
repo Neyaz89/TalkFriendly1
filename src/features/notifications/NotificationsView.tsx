@@ -14,7 +14,7 @@ export function NotificationsView() {
   const [notifications, setNotifications] = useState<NotificationWithActor[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
-  const { showToast } = useToast();
+  const { success, error } = useToast();
 
   useEffect(() => {
     loadNotifications();
@@ -35,7 +35,7 @@ export function NotificationsView() {
       setNotifications(data);
     } catch (error) {
       console.error('Error loading notifications:', error);
-      showToast('error', 'Failed to load notifications');
+      error( 'Failed to load notifications');
     } finally {
       setLoading(false);
     }
@@ -56,10 +56,10 @@ export function NotificationsView() {
     try {
       await notificationService.markAllAsRead();
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-      showToast('success', 'All notifications marked as read');
+      success( 'All notifications marked as read');
     } catch (error) {
       console.error('Error marking all as read:', error);
-      showToast('error', 'Failed to mark all as read');
+      error( 'Failed to mark all as read');
     }
   };
 
@@ -67,10 +67,10 @@ export function NotificationsView() {
     try {
       await notificationService.deleteNotification(id);
       setNotifications(prev => prev.filter(n => n.id !== id));
-      showToast('success', 'Notification deleted');
+      success( 'Notification deleted');
     } catch (error) {
       console.error('Error deleting notification:', error);
-      showToast('error', 'Failed to delete notification');
+      error( 'Failed to delete notification');
     }
   };
 
@@ -80,10 +80,10 @@ export function NotificationsView() {
     try {
       await notificationService.clearAllNotifications();
       setNotifications([]);
-      showToast('success', 'All notifications cleared');
+      success( 'All notifications cleared');
     } catch (error) {
       console.error('Error clearing notifications:', error);
-      showToast('error', 'Failed to clear notifications');
+      error( 'Failed to clear notifications');
     }
   };
 

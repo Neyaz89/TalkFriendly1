@@ -32,7 +32,7 @@ export function DoctorsTab() {
   const [filteredConnections, setFilteredConnections] = useState<ConnectionWithProfiles[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const { showToast } = useToast();
+  const { success, error } = useToast();
 
   useEffect(() => {
     loadDoctorConnections();
@@ -58,7 +58,7 @@ export function DoctorsTab() {
       setFilteredConnections(doctorConnections);
     } catch (error) {
       console.error('Error loading doctor connections:', error);
-      showToast('error', 'Failed to load connections');
+      error( 'Failed to load connections');
     } finally {
       setLoading(false);
     }
@@ -91,7 +91,7 @@ export function DoctorsTab() {
       const canMessage = await doctorService.canMessageDoctor(doctorId);
       
       if (!canMessage) {
-        showToast('error', 'This doctor is not accepting messages at the moment');
+        error( 'This doctor is not accepting messages at the moment');
         return;
       }
 
@@ -110,7 +110,7 @@ export function DoctorsTab() {
       router.push(`/messages?conversation=${data.conversation.id}`);
     } catch (error: any) {
       console.error('Error creating conversation:', error);
-      showToast('error', error.message || 'Failed to start conversation');
+      error( error.message || 'Failed to start conversation');
     }
   };
 

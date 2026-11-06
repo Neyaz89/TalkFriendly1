@@ -104,7 +104,9 @@ export function ConversationList({
 
                       <div className="flex items-center justify-between gap-2">
                         <p className={`text-sm truncate ${hasUnread ? 'font-medium text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'}`}>
-                          {conversation.last_message || 'No messages yet'}
+                          {typeof conversation.last_message === 'string' 
+                            ? conversation.last_message 
+                            : conversation.last_message?.content || 'No messages yet'}
                         </p>
 
                         {hasUnread && (

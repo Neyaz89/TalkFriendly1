@@ -11,7 +11,7 @@ import type {
   MessageListParams,
   MarkMessagesReadPayload,
   VoiceMessageUpload,
-} from '@/types';
+} from '@/types/chat.types';
 
 export const chatService = {
   /**

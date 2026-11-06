@@ -25,7 +25,7 @@ export function BlockUserDialog({
 }: BlockUserDialogProps) {
   const [reason, setReason] = useState("");
   const [isBlocking, setIsBlocking] = useState(false);
-  const { showToast } = useToast();
+  const { success, error } = useToast();
 
   const handleBlock = async () => {
     setIsBlocking(true);
@@ -36,12 +36,12 @@ export function BlockUserDialog({
         reason: reason.trim() || undefined,
       });
 
-      showToast('success', `${userName} has been blocked`);
+      success(`${userName} has been blocked`);
       onBlocked?.();
       handleClose();
-    } catch (error: any) {
-      console.error('Error blocking user:', error);
-      showToast('error', error.message || 'Failed to block user');
+    } catch (err: any) {
+      console.error('Error blocking user:', err);
+      error(err.message || 'Failed to block user');
     } finally {
       setIsBlocking(false);
     }

@@ -38,7 +38,7 @@ export default function ChatWindow({
     const unsubscribe = messagingService.subscribeToConversation(
       conversation.id,
       (message) => {
-        console.log('📩 Real-time message received:', message.id, message.content.substring(0, 20));
+        console.log('📩 Real-time message received:', message.id, message.content?.substring(0, 20) || '(empty)');
         
         // Check if message already exists (to avoid duplicates from optimistic updates)
         setMessages((prev) => {

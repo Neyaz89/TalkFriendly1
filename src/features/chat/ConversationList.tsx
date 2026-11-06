@@ -31,7 +31,7 @@ export function ConversationList({
     return (
       participant?.full_name?.toLowerCase().includes(searchLower) ||
       participant?.username?.toLowerCase().includes(searchLower) ||
-      conversation.last_message?.toLowerCase().includes(searchLower)
+      conversation.last_message?.content?.toLowerCase().includes(searchLower)
     );
   });
 

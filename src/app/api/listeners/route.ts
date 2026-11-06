@@ -21,6 +21,7 @@ export async function GET(request: Request) {
     let query = supabase
       .from('listeners')
       .select('*')
+      .eq('verification_status', 'verified') // Only show verified listeners
       .order('rating', { ascending: false })
 
     if (specialty) {

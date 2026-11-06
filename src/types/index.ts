@@ -14,3 +14,22 @@ export * from "./event.types";
 export * from "./affirmation.types";
 export * from "./ai.types";
 export * from "./dashboard.types";
+export * from "./connection.types";
+export * from "./doctor.types";
+export * from "./feed.types";
+export * from "./chat.types";
+export * from "./notification.types";
+export * from "./block.types";
+export * from "./report.types";
+
+// Appointment System Types
+export * from "./appointment.types";
+export * from "./google-meet.types";
+export * from "./financial.types";
+
+// Connections and Messaging System
+export * from "./connections.types";
+
+// Admin System & Listener Applications
+export * from "./admin.types";
+export * from "./listener-application.types";

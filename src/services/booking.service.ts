@@ -31,8 +31,29 @@ export const bookingService = {
 
     const endTime = calculateEndTime(payload.startTime, payload.duration);
 
+    const bookingId = `booking_${generateId()}`;
+    
+    // Call API endpoint to create Google Meet link (server-side only)
+    let meetingUrl = `https://meet.talkfriendly.app/${generateId()}`;
+    try {
+      const response = await fetch('/api/google-meet/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appointmentId: bookingId }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        meetingUrl = data.meeting_uri;
+        console.log('✅ Created real Google Meet link:', meetingUrl);
+      }
+    } catch (error) {
+      console.warn('⚠️  Failed to create Google Meet link, using fallback:', error);
+      // Keep the fallback URL
+    }
+
     const booking: Booking = {
-      id: `booking_${generateId()}`,
+      id: bookingId,
       userId: "user_001",
       listenerId: payload.listenerId,
       listenerName: listener.name,
@@ -46,7 +67,7 @@ export const bookingService = {
       price: getPriceForDuration(listener.pricing.perSession, payload.duration),
       currency: "USD",
       notes: payload.notes,
-      meetingUrl: `https://meet.talkfriendly.app/${generateId()}`,
+      meetingUrl,
       createdAt: new Date().toISOString(),
     };
 

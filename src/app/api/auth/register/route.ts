@@ -3,12 +3,26 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
   try {
-    const { email, password, username, fullName } = await request.json()
+    const { email, password, username, fullName, accountType } = await request.json()
 
     // Validate input
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
+        { status: 400 }
+      )
+    }
+
+    // Validate account type - only 'user' and 'listener' allowed via public registration
+    const allowedAccountTypes = ['user', 'listener'];
+    const validatedAccountType = accountType && allowedAccountTypes.includes(accountType) 
+      ? accountType 
+      : 'user'; // Default to 'user' if not specified or invalid
+
+    // Never allow 'admin' or 'doctor' via public registration
+    if (accountType === 'admin' || accountType === 'doctor') {
+      return NextResponse.json(
+        { error: 'Invalid account type' },
         { status: 400 }
       )
     }
@@ -23,6 +37,7 @@ export async function POST(request: Request) {
         data: {
           username: username || email.split('@')[0],
           full_name: fullName || '',
+          account_type: validatedAccountType,
         },
       },
     })
@@ -43,6 +58,7 @@ export async function POST(request: Request) {
           username: username || email.split('@')[0],
           full_name: fullName || '',
           email: email,
+          account_type: validatedAccountType, // Server-validated account type
         })
 
       if (profileError) {
@@ -55,6 +71,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       message: 'Registration successful',
       user: authData.user,
+      account_type: validatedAccountType,
     })
   } catch (error) {
     console.error('Registration error:', error)

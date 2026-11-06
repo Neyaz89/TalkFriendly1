@@ -10,7 +10,7 @@ interface AuthContextType {
   session: Session | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<void>
-  signUp: (email: string, password: string, username?: string, fullName?: string, profession?: string, dateOfBirth?: string, ageConfirmed?: boolean) => Promise<void>
+  signUp: (email: string, password: string, username?: string, fullName?: string, profession?: string, dateOfBirth?: string, ageConfirmed?: boolean, accountType?: 'user' | 'listener') => Promise<void>
   signOut: () => Promise<void>
   refreshUser: () => Promise<void>
 }
@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.refresh()
   }
 
-  const signUp = async (email: string, password: string, username?: string, fullName?: string, profession?: string, dateOfBirth?: string, ageConfirmed?: boolean) => {
+  const signUp = async (email: string, password: string, username?: string, fullName?: string, profession?: string, dateOfBirth?: string, ageConfirmed?: boolean, accountType: 'user' | 'listener' = 'user') => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -73,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           profession: profession || '',
           date_of_birth: dateOfBirth || null,
           age_confirmed: ageConfirmed || false,
+          account_type: accountType, // Pass account type
         },
       },
     })
@@ -91,6 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         profession: profession || '',
         date_of_birth: dateOfBirth || null,
         age_confirmed: ageConfirmed || false,
+        account_type: accountType, // Set account type in profile
       })
     }
 

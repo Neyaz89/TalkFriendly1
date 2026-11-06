@@ -25,6 +25,9 @@ import {
   ChevronLeft,
   ChevronRight,
   UserSearch,
+  Newspaper,
+  UserCircle,
+  MessageCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ROUTES } from "@/constants";
@@ -33,11 +36,14 @@ import { Avatar } from "@/components/ui/avatar";
 
 const NAV_ITEMS = [
   { label: "Home", href: ROUTES.DASHBOARD, icon: Home },
+  { label: "Listeners", href: ROUTES.LISTENERS, icon: Headphones },
+  { label: "Messages", href: ROUTES.MESSAGES, icon: MessageCircle },
+  { label: "Connections", href: ROUTES.CONNECTIONS, icon: UserCircle },
+  { label: "Communities", href: ROUTES.COMMUNITIES, icon: Users },
+  { label: "Feed", href: ROUTES.FEED, icon: Newspaper },
   { label: "AI Companion", href: ROUTES.AI, icon: Sparkles },
   { label: "Journal", href: ROUTES.JOURNAL, icon: BookOpen },
   { label: "Moods", href: ROUTES.MOODS, icon: Activity },
-  { label: "Communities", href: ROUTES.COMMUNITIES, icon: Users },
-  { label: "Listeners", href: ROUTES.LISTENERS, icon: Headphones },
   { label: "Circles", href: ROUTES.CIRCLES, icon: Circle },
   { label: "Events", href: ROUTES.EVENTS, icon: Calendar },
   { label: "Affirmations", href: ROUTES.AFFIRMATIONS, icon: Heart },

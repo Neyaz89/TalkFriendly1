@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Mail, Lock, User, Chrome } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Chrome, Stethoscope } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -47,7 +47,11 @@ const registerSchema = z
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
-export function RegisterForm() {
+interface RegisterFormProps {
+  role: 'user' | 'listener';
+}
+
+export function RegisterForm({ role }: RegisterFormProps) {
   const router = useRouter();
   const { signUp } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
@@ -72,9 +76,38 @@ export function RegisterForm() {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setError(null);
+      
       // Extract username from name (or use email prefix as fallback)
       const username = data.name.toLowerCase().replace(/\s+/g, '_');
-      await signUp(data.email, data.password, username, data.name, data.profession, data.dateOfBirth, data.ageConfirmed);
+      
+      // If Listener role, save basic info and redirect to application form
+      if (role === 'listener') {
+        // Store registration data temporarily in sessionStorage
+        sessionStorage.setItem('listener_registration_data', JSON.stringify({
+          email: data.email,
+          password: data.password,
+          name: data.name,
+          profession: data.profession,
+          dateOfBirth: data.dateOfBirth,
+          ageConfirmed: data.ageConfirmed
+        }));
+        
+        // Redirect to Listener application form
+        router.push('/auth/register/listener-application');
+        return;
+      }
+      
+      // Normal user registration
+      await signUp(
+        data.email, 
+        data.password, 
+        username, 
+        data.name, 
+        data.profession, 
+        data.dateOfBirth, 
+        data.ageConfirmed,
+        'user' // Explicitly pass account type
+      );
       setEmailSent(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -117,11 +150,20 @@ export function RegisterForm() {
     );
   }
 
+  const roleLabel = role === 'listener' ? 'Professional Listener' : 'User';
+  const roleDescription = role === 'listener' 
+    ? 'You will complete a professional application after this step.'
+    : 'Start your free mental wellness journey today.';
+
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
       <div className="mb-8">
+        <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-4">
+          {role === 'listener' ? <Stethoscope className="h-4 w-4" /> : <User className="h-4 w-4" />}
+          {roleLabel} Account
+        </div>
         <h1 className="text-2xl font-bold text-text">Create your account</h1>
-        <p className="text-muted mt-1">Start your free mental wellness journey today.</p>
+        <p className="text-muted mt-1">{roleDescription}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 mb-6">
@@ -199,6 +241,10 @@ export function RegisterForm() {
       <p className="text-center text-sm text-muted mt-6">
         Already have an account?{" "}
         <Link href={ROUTES.LOGIN} className="text-primary font-medium hover:underline">Sign in</Link>
+        {" · "}
+        <Link href="/auth/register/role-select" className="text-muted hover:text-text font-medium">
+          Change account type
+        </Link>
       </p>
     </motion.div>
   );

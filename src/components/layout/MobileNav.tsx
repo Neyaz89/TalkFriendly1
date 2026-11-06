@@ -8,16 +8,16 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Sparkles, BookOpen, Users, User } from "lucide-react";
+import { Home, Sparkles, BookOpen, Users, User, Newspaper, MessageCircle, Headphones } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ROUTES } from "@/constants";
 
 const MOBILE_NAV_ITEMS = [
-  { label: "Home",      href: ROUTES.DASHBOARD,    icon: Home     },
-  { label: "AI",        href: ROUTES.AI,            icon: Sparkles },
-  { label: "Journal",   href: ROUTES.JOURNAL,       icon: BookOpen },
-  { label: "Community", href: ROUTES.COMMUNITIES,   icon: Users    },
-  { label: "Profile",   href: ROUTES.PROFILE,       icon: User     },
+  { label: "Home",      href: ROUTES.DASHBOARD,    icon: Home          },
+  { label: "Listeners", href: ROUTES.LISTENERS,    icon: Headphones    },
+  { label: "Messages",  href: ROUTES.MESSAGES,     icon: MessageCircle },
+  { label: "Community", href: ROUTES.COMMUNITIES,  icon: Users         },
+  { label: "Profile",   href: ROUTES.PROFILE,      icon: User          },
 ];
 
 export function MobileNav() {

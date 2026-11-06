@@ -2,17 +2,19 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Star, Clock, CheckCircle } from "lucide-react";
+import { Search, Star, Clock, CheckCircle, UserPlus, MessageCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { listenerService } from "@/services/listener.service";
+import { connectionService } from "@/services/connection.service";
 import type { Listener } from "@/types";
 import { formatPrice } from "@/lib/utils";
 import { ListenerCardSkeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants";
 
 const EXPERTISE_FILTERS = ["anxiety", "stress", "career", "grief", "relationships", "meditation", "students", "burnout"];
@@ -71,6 +73,97 @@ export function ListenersView() {
 }
 
 function ListenerCard({ listener }: { listener: Listener }) {
+  const router = useRouter();
+  const [connectionStatus, setConnectionStatus] = useState<'none' | 'pending_sent' | 'pending_received' | 'connected' | 'blocked'>('none');
+  const [connectionId, setConnectionId] = useState<string | null>(null);
+  const [isLoadingConnection, setIsLoadingConnection] = useState(false);
+
+  useEffect(() => {
+    fetchConnectionStatus();
+  }, [listener.id]);
+
+  const fetchConnectionStatus = async () => {
+    try {
+      const status = await connectionService.getConnectionStatus(listener.id, false); // Use browser client
+      setConnectionStatus(status.status);
+      setConnectionId(status.connection_id);
+    } catch (err) {
+      console.error('Error fetching connection status:', err);
+    }
+  };
+
+  const handleConnectionAction = async (action: 'send' | 'accept' | 'message') => {
+    if (isLoadingConnection) return;
+
+    setIsLoadingConnection(true);
+    try {
+      if (action === 'send') {
+        await connectionService.sendConnectionRequest(listener.id, false); // Use browser client
+        await fetchConnectionStatus();
+      } else if (action === 'accept' && connectionId) {
+        await connectionService.respondToConnectionRequest(connectionId, 'accepted', false); // Use browser client
+        await fetchConnectionStatus();
+      } else if (action === 'message') {
+        router.push(`/messages?user=${listener.id}`);
+      }
+    } catch (err: any) {
+      alert(err.message || 'Failed to perform action');
+    } finally {
+      setIsLoadingConnection(false);
+    }
+  };
+
+  const renderConnectionButton = () => {
+    switch (connectionStatus) {
+      case 'none':
+        return (
+          <Button
+            onClick={() => handleConnectionAction('send')}
+            disabled={isLoadingConnection}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1"
+          >
+            <UserPlus className="h-3 w-3" />
+            Connect
+          </Button>
+        );
+      case 'pending_sent':
+        return (
+          <Button variant="outline" size="sm" disabled className="text-xs">
+            Request Sent
+          </Button>
+        );
+      case 'pending_received':
+        return (
+          <Button
+            onClick={() => handleConnectionAction('accept')}
+            disabled={isLoadingConnection}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1"
+          >
+            <UserPlus className="h-3 w-3" />
+            Accept
+          </Button>
+        );
+      case 'connected':
+        return (
+          <Button
+            onClick={() => handleConnectionAction('message')}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1"
+          >
+            <MessageCircle className="h-3 w-3" />
+            Message
+          </Button>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <Card className="hover:shadow-card-hover transition-all duration-200 group">
       <CardContent className="p-5">
@@ -116,9 +209,7 @@ function ListenerCard({ listener }: { listener: Listener }) {
               Book {formatPrice(listener.pricing.perSession)}
             </Link>
           </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href={ROUTES.LISTENER(listener.id)}>Profile</Link>
-          </Button>
+          {renderConnectionButton()}
         </div>
 
         {listener.pricing.trialAvailable && (

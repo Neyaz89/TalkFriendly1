@@ -50,7 +50,7 @@ export function ReportDialog({
 
     try {
       await reportService.createReport({
-        entity_type: entityType,
+        report_type: entityType,
         entity_id: entityId,
         reason: selectedReason,
         description: description.trim() || undefined,

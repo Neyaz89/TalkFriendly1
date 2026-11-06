@@ -98,7 +98,7 @@ export function AdminNavigation({ admin }: AdminNavigationProps) {
           <Shield className="h-8 w-8 text-primary" />
           <div>
             <h2 className="font-bold text-gray-900">Admin Panel</h2>
-            <p className="text-xs text-gray-500">{admin.role?.display_name}</p>
+            <p className="text-xs text-gray-500">{admin.role?.role_name}</p>
           </div>
         </div>
         <button
@@ -136,7 +136,7 @@ export function AdminNavigation({ admin }: AdminNavigationProps) {
                   {admin.full_name || admin.username}
                 </p>
                 <p className="text-xs text-gray-400 truncate">
-                  {admin.role?.display_name}
+                  {admin.role?.role_name}
                 </p>
               </div>
             </div>

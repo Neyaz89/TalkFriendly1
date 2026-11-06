@@ -114,6 +114,8 @@ export default function ConnectionsList() {
           key={connection.id}
           profile={{
             ...connection.connected_user,
+            role: 'user',
+            created_at: connection.created_at || new Date().toISOString(),
             connection_status: 'connected',
             connection_id: connection.id,
           }}

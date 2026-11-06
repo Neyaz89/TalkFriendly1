@@ -23,10 +23,10 @@ export function ConnectionRequestsCard() {
 
   const loadRequests = async () => {
     try {
-      const data = await connectionService.getReceivedRequests();
-      setRequests(data);
-    } catch (error) {
-      console.error('Error loading requests:', error);
+      const { requests: data } = await connectionService.getConnectionRequests();
+      setRequests(data as any);
+    } catch (err) {
+      console.error('Error loading requests:', err);
     } finally {
       setLoading(false);
     }
@@ -36,12 +36,12 @@ export function ConnectionRequestsCard() {
     setProcessingIds(prev => new Set(prev).add(requestId));
     
     try {
-      await connectionService.acceptRequest(requestId);
+      await connectionService.respondToConnectionRequest(requestId, 'accepted');
       setRequests(prev => prev.filter(r => r.id !== requestId));
-      success( 'Connection request accepted!');
-    } catch (error: any) {
-      console.error('Error accepting request:', error);
-      error( error.message || 'Failed to accept request');
+      success('Connection request accepted!');
+    } catch (err: any) {
+      console.error('Error accepting request:', err);
+      error(err.message || 'Failed to accept request');
     } finally {
       setProcessingIds(prev => {
         const next = new Set(prev);
@@ -55,12 +55,12 @@ export function ConnectionRequestsCard() {
     setProcessingIds(prev => new Set(prev).add(requestId));
     
     try {
-      await connectionService.rejectRequest(requestId);
+      await connectionService.respondToConnectionRequest(requestId, 'rejected');
       setRequests(prev => prev.filter(r => r.id !== requestId));
-      success( 'Connection request rejected');
-    } catch (error: any) {
-      console.error('Error rejecting request:', error);
-      error( error.message || 'Failed to reject request');
+      success('Connection request rejected');
+    } catch (err: any) {
+      console.error('Error rejecting request:', err);
+      error(err.message || 'Failed to reject request');
     } finally {
       setProcessingIds(prev => {
         const next = new Set(prev);

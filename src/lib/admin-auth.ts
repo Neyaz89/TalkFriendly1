@@ -219,11 +219,11 @@ export function hasPermission(admin: AdminUser, permission: string): boolean {
   if (!admin || !admin.role) return false;
 
   // Super admin has all permissions
-  if (admin.role.name === 'super_admin') return true;
+  if (admin.role.role_name === 'super_admin') return true;
 
   // Check role permissions
   const permissions = admin.role.permissions || [];
-  return permissions.some((p: AdminPermission) => p.permission_key === permission);
+  return permissions.some((p: AdminPermission) => p.permission === permission);
 }
 
 /**

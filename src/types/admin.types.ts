@@ -9,6 +9,7 @@
 
 export interface AdminUser {
   id: string;
+  user_id: string;
   username: string;
   full_name: string | null;
   email: string;
@@ -16,6 +17,7 @@ export interface AdminUser {
   account_type: 'admin';
   is_active: boolean;
   created_at: string;
+  role: AdminRole & { permissions: AdminPermission[] };
   permissions: AdminPermission[];
   roles: string[];
 }

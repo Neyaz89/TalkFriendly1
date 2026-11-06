@@ -50,7 +50,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
             }
           `}
         >
-          {message.type === 'voice' && message.voice_url ? (
+          {message.message_type === 'voice' && message.voice_url ? (
             <VoiceMessagePlayer
               url={message.voice_url}
               duration={message.voice_duration || 0}

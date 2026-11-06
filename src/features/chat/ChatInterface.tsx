@@ -31,7 +31,7 @@ export function ChatInterface({ conversationId, onBack }: ChatInterfaceProps) {
   const [sending, setSending] = useState(false);
   const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { success, error } = useToast();
+  const { success, error: showError } = useToast();
 
   useEffect(() => {
     loadConversation();
@@ -75,7 +75,7 @@ export function ChatInterface({ conversationId, onBack }: ChatInterfaceProps) {
       setMessages(data);
     } catch (error) {
       console.error('Error loading messages:', error);
-      error( 'Failed to load messages');
+      showError('Failed to load messages');
     } finally {
       setLoading(false);
     }
@@ -108,7 +108,7 @@ export function ChatInterface({ conversationId, onBack }: ChatInterfaceProps) {
       });
     } catch (error: any) {
       console.error('Error sending message:', error);
-      error( error.message || 'Failed to send message');
+      showError(error.message || 'Failed to send message');
       setMessageText(text); // Restore message on error
     } finally {
       setSending(false);
@@ -130,10 +130,10 @@ export function ChatInterface({ conversationId, onBack }: ChatInterfaceProps) {
       });
 
       setShowVoiceRecorder(false);
-      success( 'Voice message sent!');
+      success('Voice message sent!');
     } catch (error: any) {
       console.error('Error sending voice message:', error);
-      error( error.message || 'Failed to send voice message');
+      showError(error.message || 'Failed to send voice message');
     } finally {
       setSending(false);
     }

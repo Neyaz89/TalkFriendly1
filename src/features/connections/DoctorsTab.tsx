@@ -47,18 +47,18 @@ export function DoctorsTab() {
       const data = await connectionService.getConnections();
       
       // Filter to only show doctors
-      const doctorConnections = data.filter(conn => {
-        const otherUser = conn.user_1_profile?.id === user?.id 
-          ? conn.user_2_profile 
-          : conn.user_1_profile;
+      const doctorConnections = data.connections.filter(conn => {
+        const otherUser = conn.user_id === user?.id 
+          ? conn.connected_user 
+          : conn.connected_user;
         return otherUser?.account_type === 'doctor';
       });
       
-      setConnections(doctorConnections);
-      setFilteredConnections(doctorConnections);
-    } catch (error) {
-      console.error('Error loading doctor connections:', error);
-      error( 'Failed to load connections');
+      setConnections(doctorConnections as any);
+      setFilteredConnections(doctorConnections as any);
+    } catch (err) {
+      console.error('Error loading doctor connections:', err);
+      error('Failed to load connections');
     } finally {
       setLoading(false);
     }
@@ -72,9 +72,7 @@ export function DoctorsTab() {
 
     const term = searchTerm.toLowerCase();
     const filtered = connections.filter(conn => {
-      const doctor = conn.user_1_profile?.id === user?.id 
-        ? conn.user_2_profile 
-        : conn.user_1_profile;
+      const doctor = conn.connected_user;
       
       const name = (doctor?.full_name || doctor?.username || '').toLowerCase();
       const bio = (doctor?.bio || '').toLowerCase();

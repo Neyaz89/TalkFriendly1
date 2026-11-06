@@ -83,7 +83,7 @@ export function ChatInterface({ conversationId, onBack }: ChatInterfaceProps) {
 
   const markAsRead = async () => {
     try {
-      await chatService.markConversationAsRead(conversationId);
+      await chatService.markAsRead({ conversation_id: conversationId });
     } catch (error) {
       console.error('Error marking as read:', error);
     }
@@ -104,7 +104,7 @@ export function ChatInterface({ conversationId, onBack }: ChatInterfaceProps) {
       await chatService.sendMessage({
         conversation_id: conversationId,
         content: text,
-        type: 'text',
+        message_type: 'text',
       });
     } catch (error: any) {
       console.error('Error sending message:', error);
@@ -119,13 +119,14 @@ export function ChatInterface({ conversationId, onBack }: ChatInterfaceProps) {
     try {
       setSending(true);
       
-      const { url } = await chatService.uploadVoiceMessage(audioBlob);
+      const voicePath = await chatService.uploadVoiceMessage(conversationId, { blob: audioBlob });
+      const voiceUrl = await chatService.getVoiceMessageUrl(voicePath);
       
       await chatService.sendMessage({
         conversation_id: conversationId,
         content: 'Voice message',
-        type: 'voice',
-        voice_url: url,
+        message_type: 'voice',
+        voice_url: voiceUrl,
         voice_duration: duration,
       });
 

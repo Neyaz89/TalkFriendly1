@@ -32,7 +32,7 @@ export function BlockUserDialog({
 
     try {
       await blockService.blockUser({
-        blocked_user_id: userId,
+        blocked_id: userId,
         reason: reason.trim() || undefined,
       });
 

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { reportService } from "@/services/report.service";
+import type { ReportType } from "@/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,7 +12,7 @@ import { useToast } from "@/hooks/useToast";
 interface ReportDialogProps {
   open: boolean;
   onClose: () => void;
-  entityType: 'user' | 'post' | 'comment' | 'message';
+  entityType: ReportType;
   entityId: string;
   entityTitle?: string;
 }
@@ -76,7 +77,7 @@ export function ReportDialog({
     switch (entityType) {
       case 'user': return 'user';
       case 'post': return 'post';
-      case 'comment': return 'comment';
+      case 'community': return 'community';
       case 'message': return 'message';
       default: return 'content';
     }

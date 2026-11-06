@@ -110,7 +110,7 @@ export function ConversationList({
                         </p>
 
                         {hasUnread && (
-                          <Badge variant="primary" className="flex-shrink-0 text-xs">
+                          <Badge variant="default" className="flex-shrink-0 text-xs">
                             {conversation.unread_count}
                           </Badge>
                         )}

@@ -36,14 +36,9 @@ export function PeopleTab() {
     try {
       const data = await connectionService.getConnections();
       
-      // Filter out doctors - only show normal users/listeners
-      const peopleConnections = data.connections.filter(conn => {
-        const otherUser = conn.connected_user;
-        return otherUser?.account_type !== 'doctor';
-      });
-      
-      setConnections(peopleConnections as any);
-      setFilteredConnections(peopleConnections as any);
+      // Show all connections (users and listeners)
+      setConnections(data.connections as any);
+      setFilteredConnections(data.connections as any);
     } catch (err) {
       console.error('Error loading connections:', err);
       error('Failed to load connections');

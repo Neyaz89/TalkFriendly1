@@ -212,7 +212,7 @@ export function AdminNavigation({ admin }: AdminNavigationProps) {
                       {admin.full_name || admin.username}
                     </p>
                     <p className="text-xs text-gray-400 truncate">
-                      {admin.role?.display_name}
+                      {admin.role?.role_name}
                     </p>
                   </div>
                 </div>

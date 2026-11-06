@@ -31,7 +31,7 @@ export interface UserConnectionWithProfile extends UserConnection {
   };
 }
 
-export interface ConnectionRequest {
+export interface ConnectionRequestResponse {
   id: string;
   from_user: {
     id: string;
@@ -135,7 +135,7 @@ export interface ConnectionsListResponse {
 }
 
 export interface ConnectionRequestsResponse {
-  requests: ConnectionRequest[];
+  requests: ConnectionRequestResponse[];
   total: number;
 }
 

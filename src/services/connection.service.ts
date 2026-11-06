@@ -7,12 +7,14 @@ import { createClient as createBrowserClient } from '@/lib/supabase/client';
 import type {
   UserConnection,
   UserConnectionWithProfile,
-  ConnectionRequest,
   ConnectionsListResponse,
-  ConnectionRequestsResponse,
   ConnectionsFilterParams,
   UserProfileCard,
 } from '@/types';
+import type {
+  ConnectionRequestResponse,
+  ConnectionRequestsResponse,
+} from '@/types/connections.types';
 
 export const connectionService = {
   /**
@@ -239,7 +241,7 @@ export const connectionService = {
     }
 
     return {
-      requests: (data || []) as any as ConnectionRequest[],
+      requests: (data || []) as any as ConnectionRequestResponse[],
       total: count || 0,
     };
   },

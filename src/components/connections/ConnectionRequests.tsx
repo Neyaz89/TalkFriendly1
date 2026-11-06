@@ -8,10 +8,10 @@
 import { useState, useEffect } from 'react';
 import { UserPlus, Loader2, Check, X } from 'lucide-react';
 import Image from 'next/image';
-import type { ConnectionRequest } from '@/types/connections.types';
+import type { ConnectionRequestResponse } from '@/types/connections.types';
 
 export default function ConnectionRequests() {
-  const [requests, setRequests] = useState<ConnectionRequest[]>([]);
+  const [requests, setRequests] = useState<ConnectionRequestResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());

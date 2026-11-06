@@ -19,7 +19,7 @@ export function VoiceRecorder({ onRecordingComplete, onCancel, disabled = false 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const { success, error } = useToast();
+  const { error: showError } = useToast();
 
   useEffect(() => {
     return () => {
@@ -73,9 +73,9 @@ export function VoiceRecorder({ onRecordingComplete, onCancel, disabled = false 
         });
       }, 1000);
 
-    } catch (error) {
-      console.error('Error starting recording:', error);
-      error( 'Failed to access microphone. Please check permissions.');
+    } catch (err) {
+      console.error('Error starting recording:', err);
+      showError('Failed to access microphone. Please check permissions.');
     }
   };
 

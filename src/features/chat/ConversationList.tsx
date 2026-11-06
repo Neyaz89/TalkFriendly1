@@ -70,7 +70,7 @@ export function ConversationList({
             {filteredConversations.map(conversation => {
               const participant = conversation.participant;
               const isSelected = conversation.id === selectedConversationId;
-              const hasUnread = conversation.unread_count > 0;
+              const hasUnread = (conversation.unread_count || 0) > 0;
 
               return (
                 <button

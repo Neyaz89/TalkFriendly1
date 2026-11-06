@@ -119,7 +119,7 @@ export function ChatInterface({ conversationId, onBack }: ChatInterfaceProps) {
     try {
       setSending(true);
       
-      const voicePath = await chatService.uploadVoiceMessage(conversationId, { blob: audioBlob });
+      const voicePath = await chatService.uploadVoiceMessage(conversationId, { blob: audioBlob, duration });
       const voiceUrl = await chatService.getVoiceMessageUrl(voicePath);
       
       await chatService.sendMessage({

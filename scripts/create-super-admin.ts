@@ -153,7 +153,7 @@ async function createSuperAdmin() {
       role = newRole;
     }
 
-    console.log(`   ✓ Super admin role ready (ID: ${role.id})`);
+    console.log(`   ✓ Super admin role ready (ID: ${role!.id})`);
 
     // Step 4: Create admin user record
     console.log('4/5 Creating admin user record...');
@@ -161,7 +161,7 @@ async function createSuperAdmin() {
       .from('admin_users')
       .insert({
         user_id: userId,
-        role_id: role.id,
+        role_id: role!.id,
         email,
         username,
         full_name: fullName,

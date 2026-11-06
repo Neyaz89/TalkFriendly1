@@ -42,7 +42,7 @@ export function ListenerVerificationBanner({ status, hasApplication }: ListenerV
             {config.description}
           </p>
           <div className="flex flex-wrap gap-3">
-            {config.buttons.map((button, index) => (
+            {config.buttons.map((button: any, index: number) => (
               <Button
                 key={index}
                 onClick={() => router.push(button.href)}

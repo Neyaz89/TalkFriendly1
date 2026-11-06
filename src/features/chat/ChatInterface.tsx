@@ -71,7 +71,7 @@ export function ChatInterface({ conversationId, onBack }: ChatInterfaceProps) {
   const loadMessages = async () => {
     try {
       setLoading(true);
-      const data = await chatService.getMessages(conversationId);
+      const data = await chatService.getMessages({ conversation_id: conversationId });
       setMessages(data);
     } catch (error) {
       console.error('Error loading messages:', error);

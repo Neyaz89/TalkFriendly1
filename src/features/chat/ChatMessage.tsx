@@ -76,7 +76,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
           {/* Read Status (only for own messages) */}
           {isOwnMessage && (
             <span className="text-gray-500 dark:text-gray-500">
-              {message.read_at ? (
+              {message.is_read ? (
                 <CheckCheck className="h-3.5 w-3.5 text-primary-500" />
               ) : (
                 <Check className="h-3.5 w-3.5" />

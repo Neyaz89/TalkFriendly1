@@ -76,15 +76,13 @@ export function FeedPostCard({ post, onDelete, onUpdate, onLikeToggle }: FeedPos
     try {
       if (connectionStatus === 'none') {
         // Send connection request
-        await connectionService.sendConnectionRequest({
-          receiver_id: post.author.id,
-        });
+        await connectionService.sendConnectionRequest(post.author.id);
         setConnectionStatus('pending');
-        success( 'Connection request sent!');
+        success('Connection request sent!');
       }
-    } catch (error: any) {
-      console.error('Error sending connection request:', error);
-      error( error.message || 'Failed to send request');
+    } catch (err: any) {
+      console.error('Error sending connection request:', err);
+      error(err.message || 'Failed to send request');
     } finally {
       setIsLoadingConnection(false);
     }

@@ -37,18 +37,16 @@ export function PeopleTab() {
       const data = await connectionService.getConnections();
       
       // Filter out doctors - only show normal users/listeners
-      const peopleConnections = data.filter(conn => {
-        const otherUser = conn.user_1_profile?.id === user?.id 
-          ? conn.user_2_profile 
-          : conn.user_1_profile;
+      const peopleConnections = data.connections.filter(conn => {
+        const otherUser = conn.connected_user;
         return otherUser?.account_type !== 'doctor';
       });
       
-      setConnections(peopleConnections);
-      setFilteredConnections(peopleConnections);
-    } catch (error) {
-      console.error('Error loading connections:', error);
-      error( 'Failed to load connections');
+      setConnections(peopleConnections as any);
+      setFilteredConnections(peopleConnections as any);
+    } catch (err) {
+      console.error('Error loading connections:', err);
+      error('Failed to load connections');
     } finally {
       setLoading(false);
     }
@@ -62,9 +60,7 @@ export function PeopleTab() {
 
     const term = searchTerm.toLowerCase();
     const filtered = connections.filter(conn => {
-      const otherUser = conn.user_1_profile?.id === user?.id 
-        ? conn.user_2_profile 
-        : conn.user_1_profile;
+      const otherUser = conn.connected_user;
       
       const name = (otherUser?.full_name || otherUser?.username || '').toLowerCase();
       const bio = (otherUser?.bio || '').toLowerCase();

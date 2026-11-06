@@ -6,14 +6,16 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { use } from 'react';
 
-export default function ConversationRedirectPage({ params }: { params: { id: string } }) {
+export default function ConversationRedirectPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
+  const { id } = use(params);
 
   useEffect(() => {
     // Redirect to new messages page with conversation ID
-    router.replace(`/messages?conversation=${params.id}`);
-  }, [router, params.id]);
+    router.replace(`/messages?conversation=${id}`);
+  }, [router, id]);
 
   return (
     <div className="flex items-center justify-center h-screen">

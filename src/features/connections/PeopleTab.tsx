@@ -2,13 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { connectionService } from "@/services/connection.service";
-import { createClient } from "@/lib/supabase/client";
-import type { ConnectionWithProfiles } from "@/types";
+import type { UserConnectionWithProfile } from "@/types";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { MessageCircle, Search, UserMinus, MapPin, Users } from "lucide-react";
+import { MessageCircle, Search, UserMinus, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/useToast";
@@ -18,8 +17,8 @@ import { PageLoader } from "@/components/common/LoadingSpinner";
 export function PeopleTab() {
   const { user } = useAuth();
   const router = useRouter();
-  const [connections, setConnections] = useState<ConnectionWithProfiles[]>([]);
-  const [filteredConnections, setFilteredConnections] = useState<ConnectionWithProfiles[]>([]);
+  const [connections, setConnections] = useState<UserConnectionWithProfile[]>([]);
+  const [filteredConnections, setFilteredConnections] = useState<UserConnectionWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const { success, error } = useToast();
@@ -134,9 +133,7 @@ export function PeopleTab() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredConnections.map(connection => {
-            const otherUser = connection.user_1_profile?.id === user?.id 
-              ? connection.user_2_profile 
-              : connection.user_1_profile;
+            const otherUser = connection.connected_user;
 
             if (!otherUser) return null;
 
@@ -162,23 +159,16 @@ export function PeopleTab() {
                     {otherUser.full_name || otherUser.username}
                   </Link>
 
-                  {otherUser.account_type === 'listener' && (
-                    <Badge variant="secondary" className="text-xs mb-2">
-                      Listener
-                    </Badge>
+                  {otherUser.profession && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                      {otherUser.profession}
+                    </p>
                   )}
 
                   {otherUser.bio && (
                     <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
                       {otherUser.bio}
                     </p>
-                  )}
-
-                  {otherUser.location && (
-                    <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-500 mb-3">
-                      <MapPin className="h-3 w-3" />
-                      <span>{otherUser.location}</span>
-                    </div>
                   )}
 
                   <div className="flex items-center gap-2 w-full mt-auto">

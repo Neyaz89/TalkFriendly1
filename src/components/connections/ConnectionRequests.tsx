@@ -8,7 +8,7 @@
 import { useState, useEffect } from 'react';
 import { UserPlus, Loader2, Check, X } from 'lucide-react';
 import Image from 'next/image';
-import type { ConnectionRequest } from '@/types';
+import type { ConnectionRequest } from '@/types/connections.types';
 
 export default function ConnectionRequests() {
   const [requests, setRequests] = useState<ConnectionRequest[]>([]);

@@ -1,6 +1,6 @@
 "use client";
 
-import type { ConversationWithParticipant } from "@/types";
+import type { ConversationWithParticipant } from "@/types/chat.types";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
@@ -31,7 +31,7 @@ export function ConversationList({
     return (
       participant?.full_name?.toLowerCase().includes(searchLower) ||
       participant?.username?.toLowerCase().includes(searchLower) ||
-      conversation.last_message?.content?.toLowerCase().includes(searchLower)
+      (typeof conversation.last_message === 'string' && conversation.last_message.toLowerCase().includes(searchLower))
     );
   });
 
@@ -106,7 +106,7 @@ export function ConversationList({
                         <p className={`text-sm truncate ${hasUnread ? 'font-medium text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'}`}>
                           {typeof conversation.last_message === 'string' 
                             ? conversation.last_message 
-                            : conversation.last_message?.content || 'No messages yet'}
+                            : 'No messages yet'}
                         </p>
 
                         {hasUnread && (

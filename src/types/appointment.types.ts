@@ -4,6 +4,8 @@
  */
 
 import type { Database } from './database.types';
+import type { GoogleMeetConference } from './google-meet.types';
+import type { SessionFinancial } from './financial.types';
 
 // ============================================================================
 // Database Row Types (Auto-generated from Supabase schema)

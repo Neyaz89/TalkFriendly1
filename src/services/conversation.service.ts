@@ -9,7 +9,7 @@ import type {
   ConversationWithParticipant,
   CreateConversationPayload,
   ConversationListParams,
-} from '@/types';
+} from '@/types/chat.types';
 
 export const conversationService = {
   /**
@@ -342,7 +342,9 @@ export const conversationService = {
         async (payload) => {
           try {
             // Fetch the full conversation with participant details
-            const conversationId = payload.new?.id || payload.old?.id;
+            const newRecord = payload.new as Record<string, unknown> | null;
+            const oldRecord = payload.old as Record<string, unknown> | null;
+            const conversationId = (newRecord?.id || oldRecord?.id) as string | undefined;
             if (!conversationId) return;
 
             const conversation = await conversationService.getConversationById(conversationId as string);

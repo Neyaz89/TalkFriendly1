@@ -35,11 +35,11 @@ export interface ListenerPricing {
 
 export interface ListenerAvailability {
   timezone: string;
-  slots: AvailabilitySlot[];
+  slots: ListenerAvailabilitySlot[];
   nextAvailable?: string;
 }
 
-export interface AvailabilitySlot {
+export interface ListenerAvailabilitySlot {
   date: string;
   times: string[];
 }

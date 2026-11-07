@@ -164,7 +164,7 @@ export function DoctorProfileView({ doctorId }: DoctorProfileViewProps) {
                 </div>
 
                 {doctor.verification_status === 'verified' && (
-                  <Badge variant="primary" className="flex-shrink-0">
+                  <Badge variant="success" className="flex-shrink-0">
                     <Shield className="h-4 w-4 mr-1.5" />
                     Verified
                   </Badge>

@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { aiService } from "@/services/ai.service";
-import type { ChatMessage, SendMessagePayload } from "@/types";
+import type { ChatMessage, SendMessagePayload } from "@/types/ai.types";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatDate } from "@/lib/utils";
 import { AiInsightsPanel } from "./AiInsightsPanel";

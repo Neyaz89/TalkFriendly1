@@ -17,6 +17,7 @@ export interface Database {
           email: string
           avatar_url: string | null
           bio: string | null
+          profession: string | null
           account_type: 'user' | 'listener' | 'doctor' | 'admin'
           date_of_birth: string | null
           age_confirmed: boolean
@@ -35,6 +36,7 @@ export interface Database {
           email: string
           avatar_url?: string | null
           bio?: string | null
+          profession?: string | null
           account_type?: 'user' | 'listener' | 'doctor' | 'admin'
           date_of_birth?: string | null
           age_confirmed?: boolean
@@ -53,6 +55,7 @@ export interface Database {
           email?: string
           avatar_url?: string | null
           bio?: string | null
+          profession?: string | null
           account_type?: 'user' | 'listener' | 'doctor' | 'admin'
           date_of_birth?: string | null
           age_confirmed?: boolean
@@ -302,6 +305,38 @@ export interface Database {
           updated_at?: string
         }
       }
+      user_connections: {
+        Row: {
+          id: string
+          user_id: string
+          connected_user_id: string
+          status: 'pending' | 'accepted' | 'rejected' | 'blocked'
+          initiated_by: string
+          created_at: string
+          updated_at: string
+          responded_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          connected_user_id: string
+          status?: 'pending' | 'accepted' | 'rejected' | 'blocked'
+          initiated_by: string
+          created_at?: string
+          updated_at?: string
+          responded_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          connected_user_id?: string
+          status?: 'pending' | 'accepted' | 'rejected' | 'blocked'
+          initiated_by?: string
+          created_at?: string
+          updated_at?: string
+          responded_at?: string | null
+        }
+      }
       connection_requests: {
         Row: {
           id: string
@@ -403,22 +438,34 @@ export interface Database {
           id: string
           participant_1_id: string
           participant_2_id: string
-          last_message_at: string
+          last_message_at: string | null
+          last_message_preview: string | null
+          participant_1_unread_count: number
+          participant_2_unread_count: number
           created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
           participant_1_id: string
           participant_2_id: string
-          last_message_at?: string
+          last_message_at?: string | null
+          last_message_preview?: string | null
+          participant_1_unread_count?: number
+          participant_2_unread_count?: number
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
           participant_1_id?: string
           participant_2_id?: string
-          last_message_at?: string
+          last_message_at?: string | null
+          last_message_preview?: string | null
+          participant_1_unread_count?: number
+          participant_2_unread_count?: number
           created_at?: string
+          updated_at?: string
         }
       }
       messages: {
@@ -427,12 +474,14 @@ export interface Database {
           conversation_id: string
           sender_id: string
           content: string | null
-          message_type: 'text' | 'voice' | 'system'
+          message_type: 'text' | 'voice' | 'image' | 'file' | 'system'
           voice_url: string | null
           voice_duration: number | null
           is_read: boolean
+          read_at: string | null
           is_edited: boolean
           is_deleted: boolean
+          deleted_at: string | null
           created_at: string
           updated_at: string
         }
@@ -441,12 +490,14 @@ export interface Database {
           conversation_id: string
           sender_id: string
           content?: string | null
-          message_type?: 'text' | 'voice' | 'system'
+          message_type?: 'text' | 'voice' | 'image' | 'file' | 'system'
           voice_url?: string | null
           voice_duration?: number | null
           is_read?: boolean
+          read_at?: string | null
           is_edited?: boolean
           is_deleted?: boolean
+          deleted_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -455,12 +506,14 @@ export interface Database {
           conversation_id?: string
           sender_id?: string
           content?: string | null
-          message_type?: 'text' | 'voice' | 'system'
+          message_type?: 'text' | 'voice' | 'image' | 'file' | 'system'
           voice_url?: string | null
           voice_duration?: number | null
           is_read?: boolean
+          read_at?: string | null
           is_edited?: boolean
           is_deleted?: boolean
+          deleted_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -521,6 +574,86 @@ export interface Database {
           blocked_id?: string
           reason?: string | null
           created_at?: string
+        }
+      }
+      appointments: {
+        Row: {
+          id: string
+          patient_id: string
+          psychiatrist_id: string
+          doctor_profile_id: string | null
+          scheduled_start_time: string
+          scheduled_end_time: string
+          duration_minutes: number
+          timezone: string
+          booking_type: 'immediate' | 'scheduled'
+          google_meet_space_name: string | null
+          google_meet_uri: string | null
+          google_conference_id: string | null
+          price_snapshot: Json | null
+          status: string
+          payment_status: string
+          payment_transaction_id: string | null
+          actual_start_time: string | null
+          actual_end_time: string | null
+          created_at: string
+          updated_at: string
+          cancelled_at: string | null
+          cancellation_reason: string | null
+          patient_notes: string | null
+          internal_notes: string | null
+        }
+        Insert: {
+          id?: string
+          patient_id: string
+          psychiatrist_id: string
+          doctor_profile_id?: string | null
+          scheduled_start_time: string
+          scheduled_end_time: string
+          duration_minutes: number
+          timezone?: string
+          booking_type?: 'immediate' | 'scheduled'
+          google_meet_space_name?: string | null
+          google_meet_uri?: string | null
+          google_conference_id?: string | null
+          price_snapshot?: Json | null
+          status?: string
+          payment_status?: string
+          payment_transaction_id?: string | null
+          actual_start_time?: string | null
+          actual_end_time?: string | null
+          created_at?: string
+          updated_at?: string
+          cancelled_at?: string | null
+          cancellation_reason?: string | null
+          patient_notes?: string | null
+          internal_notes?: string | null
+        }
+        Update: {
+          id?: string
+          patient_id?: string
+          psychiatrist_id?: string
+          doctor_profile_id?: string | null
+          scheduled_start_time?: string
+          scheduled_end_time?: string
+          duration_minutes?: number
+          timezone?: string
+          booking_type?: 'immediate' | 'scheduled'
+          google_meet_space_name?: string | null
+          google_meet_uri?: string | null
+          google_conference_id?: string | null
+          price_snapshot?: Json | null
+          status?: string
+          payment_status?: string
+          payment_transaction_id?: string | null
+          actual_start_time?: string | null
+          actual_end_time?: string | null
+          created_at?: string
+          updated_at?: string
+          cancelled_at?: string | null
+          cancellation_reason?: string | null
+          patient_notes?: string | null
+          internal_notes?: string | null
         }
       }
       reports: {

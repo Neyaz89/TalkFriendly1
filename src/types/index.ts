@@ -12,12 +12,20 @@ export * from "./community.types";
 export * from "./booking.types";
 export * from "./event.types";
 export * from "./affirmation.types";
-export * from "./ai.types";
+// Re-export ai.types but exclude conflicting names (Conversation, SendMessagePayload)
+// which are also defined in connections.types
+export {
+  type ChatMessage,
+  type ChatAction,
+  type AiInsight,
+  type ConversationSummary,
+} from "./ai.types";
 export * from "./dashboard.types";
 export * from "./connection.types";
 export * from "./doctor.types";
 export * from "./feed.types";
-export * from "./chat.types";
+// Note: chat.types is not exported here to avoid conflicts with connections.types
+// Import directly from '@/types/chat.types' if you need the database-specific types
 export * from "./notification.types";
 export * from "./block.types";
 export * from "./report.types";
@@ -27,7 +35,7 @@ export * from "./appointment.types";
 export * from "./google-meet.types";
 export * from "./financial.types";
 
-// Connections and Messaging System
+// Connections and Messaging System (this includes Message and Conversation types)
 export * from "./connections.types";
 
 // Admin System & Listener Applications

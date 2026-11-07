@@ -2,7 +2,7 @@
  * Mock AI conversation data for development.
  */
 
-import type { Conversation, AiInsight } from "@/types";
+import type { Conversation, AiInsight } from "@/types/ai.types";
 
 export const MOCK_AI_RESPONSES = [
   "I hear you. That sounds genuinely difficult, and I want you to know it's okay to feel that way.",

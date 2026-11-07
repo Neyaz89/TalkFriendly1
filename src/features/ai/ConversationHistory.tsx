@@ -8,7 +8,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { MessageSquare, Plus } from "lucide-react";
 import { aiService } from "@/services/ai.service";
-import type { Conversation } from "@/types";
+import type { Conversation as AiConversation } from "@/types/ai.types";
 import { formatDate, truncate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,7 +24,7 @@ export function ConversationHistory({
   onSelect,
   onNew,
 }: ConversationHistoryProps) {
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversations, setConversations] = useState<AiConversation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

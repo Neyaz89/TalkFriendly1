@@ -45,12 +45,13 @@ export const blockService = {
 
     if (error) throw error;
 
-    // Remove connection if exists
+    // Remove connection if exists (use string comparison for canonical ordering)
+    const [smallerId, largerId] = [user.id, payload.blocked_id].sort();
     await supabase
       .from('connections')
       .delete()
       .or(
-        `and(user_id_1.eq.${Math.min(user.id, payload.blocked_id)},user_id_2.eq.${Math.max(user.id, payload.blocked_id)})`
+        `and(user_id_1.eq.${smallerId},user_id_2.eq.${largerId})`
       );
 
     // Cancel any pending connection requests

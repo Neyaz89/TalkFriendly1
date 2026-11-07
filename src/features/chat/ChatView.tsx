@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { conversationService } from "@/services/conversation.service";
-import type { ConversationWithParticipant } from "@/types";
+import type { ConversationWithParticipant } from "@/types/chat.types";
 import { ConversationList } from "./ConversationList";
 import { ChatInterface } from "./ChatInterface";
 import { PageLoader } from "@/components/common/LoadingSpinner";

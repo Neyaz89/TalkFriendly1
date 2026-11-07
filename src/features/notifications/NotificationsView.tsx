@@ -32,10 +32,10 @@ export function NotificationsView() {
   const loadNotifications = async () => {
     try {
       const data = await notificationService.getNotifications();
-      setNotifications(data);
-    } catch (error) {
-      console.error('Error loading notifications:', error);
-      error( 'Failed to load notifications');
+      setNotifications(data.notifications || data);
+    } catch (err) {
+      console.error('Error loading notifications:', err);
+      error('Failed to load notifications');
     } finally {
       setLoading(false);
     }
@@ -45,21 +45,21 @@ export function NotificationsView() {
     try {
       await notificationService.markAsRead(id);
       setNotifications(prev =>
-        prev.map(n => n.id === id ? { ...n, read: true } : n)
+        prev.map(n => n.id === id ? { ...n, is_read: true } : n)
       );
-    } catch (error) {
-      console.error('Error marking as read:', error);
+    } catch (err) {
+      console.error('Error marking as read:', err);
     }
   };
 
   const handleMarkAllAsRead = async () => {
     try {
       await notificationService.markAllAsRead();
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-      success( 'All notifications marked as read');
-    } catch (error) {
-      console.error('Error marking all as read:', error);
-      error( 'Failed to mark all as read');
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+      success('All notifications marked as read');
+    } catch (err) {
+      console.error('Error marking all as read:', err);
+      error('Failed to mark all as read');
     }
   };
 
@@ -67,32 +67,32 @@ export function NotificationsView() {
     try {
       await notificationService.deleteNotification(id);
       setNotifications(prev => prev.filter(n => n.id !== id));
-      success( 'Notification deleted');
-    } catch (error) {
-      console.error('Error deleting notification:', error);
-      error( 'Failed to delete notification');
+      success('Notification deleted');
+    } catch (err) {
+      console.error('Error deleting notification:', err);
+      error('Failed to delete notification');
     }
   };
 
   const handleClearAll = async () => {
-    if (!confirm('Are you sure you want to clear all notifications?')) return;
+    if (!confirm('Are you sure you want to delete all read notifications?')) return;
 
     try {
-      await notificationService.clearAllNotifications();
-      setNotifications([]);
-      success( 'All notifications cleared');
-    } catch (error) {
-      console.error('Error clearing notifications:', error);
-      error( 'Failed to clear notifications');
+      await notificationService.deleteAllRead();
+      setNotifications(prev => prev.filter(n => !n.is_read));
+      success('All read notifications cleared');
+    } catch (err) {
+      console.error('Error clearing notifications:', err);
+      error('Failed to clear notifications');
     }
   };
 
   const filteredNotifications = notifications.filter(n => {
-    if (filter === 'unread') return !n.read;
+    if (filter === 'unread') return !n.is_read;
     return true;
   });
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter(n => !n.is_read).length;
 
   if (loading) {
     return <PageLoader message="Loading notifications..." />;
@@ -132,7 +132,7 @@ export function NotificationsView() {
                 onClick={handleClearAll}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Clear all
+                Clear read
               </Button>
             </div>
           )}

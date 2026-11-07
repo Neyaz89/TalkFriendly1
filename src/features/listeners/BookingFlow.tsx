@@ -118,18 +118,26 @@ export function BookingFlow({ listenerId }: { listenerId: string }) {
         {(bookingType === "now" 
           ? (["booking-type", "type", "confirm"] as const)
           : (["booking-type", "date", "time", "type", "confirm"] as const)
-        ).map((s, i, arr) => (
-          <React.Fragment key={s}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
-              step === s || arr.slice(0, arr.indexOf(step) + 1).includes(s)
-                ? "bg-primary-500 text-white" 
-                : "bg-gray-100 text-muted"
-            }`}>
-              {i + 1}
-            </div>
-            {i < arr.length - 1 && <div className="flex-1 h-0.5 bg-gray-100 rounded" />}
-          </React.Fragment>
-        ))}
+        ).map((s, i, arr) => {
+          // Use string comparison to avoid type issues
+          const stepStr = step as string;
+          const stepIndex = arr.findIndex(x => x === stepStr);
+          const currentIndex = i;
+          const isActiveOrCompleted = step === s || (stepIndex >= 0 && currentIndex <= stepIndex);
+          
+          return (
+            <React.Fragment key={s}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
+                isActiveOrCompleted
+                  ? "bg-primary-500 text-white" 
+                  : "bg-gray-100 text-muted"
+              }`}>
+                {i + 1}
+              </div>
+              {i < arr.length - 1 && <div className="flex-1 h-0.5 bg-gray-100 rounded" />}
+            </React.Fragment>
+          );
+        })}
       </div>
 
       <AnimatePresence mode="wait">

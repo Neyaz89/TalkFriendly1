@@ -44,3 +44,12 @@ export interface NotificationListParams {
   is_read?: boolean;
   notification_type?: NotificationType;
 }
+
+export interface NotificationWithActor extends Notification {
+  actor?: {
+    id: string;
+    username: string;
+    full_name: string | null;
+    avatar_url: string | null;
+  };
+}

@@ -46,7 +46,7 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
               </Link>
               
               {doctor.verification_status === 'verified' && (
-                <Badge variant="primary" className="text-xs flex-shrink-0">
+                <Badge variant="success" className="text-xs flex-shrink-0">
                   <Shield className="h-3 w-3 mr-1" />
                   Verified
                 </Badge>

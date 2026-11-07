@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { chatService } from "@/services/chat.service";
 import { conversationService } from "@/services/conversation.service";
-import type { MessageWithSender, ConversationWithParticipant } from "@/types";
+import type { MessageWithSender, ConversationWithParticipant } from "@/types/chat.types";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";

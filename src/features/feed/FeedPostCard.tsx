@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { feedService } from "@/services/feed.service";
 import { connectionService } from "@/services/connection.service";
-import type { FeedPostWithAuthor, ConnectionStatus } from "@/types";
+import type { FeedPostWithAuthor } from "@/types";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +43,7 @@ interface FeedPostCardProps {
 
 export function FeedPostCard({ post, onDelete, onUpdate, onLikeToggle }: FeedPostCardProps) {
   const { user } = useAuth();
-  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('none');
+  const [connectionStatus, setConnectionStatus] = useState<'none' | 'pending_sent' | 'pending_received' | 'connected' | 'blocked'>('none');
   const [isLoadingConnection, setIsLoadingConnection] = useState(false);
   const [showBlockDialog, setShowBlockDialog] = useState(false);
   const [showReportDialog, setShowReportDialog] = useState(false);
@@ -61,8 +61,8 @@ export function FeedPostCard({ post, onDelete, onUpdate, onLikeToggle }: FeedPos
     if (!post.author?.id) return;
     
     try {
-      const status = await connectionService.getConnectionStatus(post.author.id);
-      setConnectionStatus(status);
+      const result = await connectionService.getConnectionStatus(post.author.id);
+      setConnectionStatus(result.status);
     } catch (error) {
       console.error('Error loading connection status:', error);
     }
@@ -77,7 +77,7 @@ export function FeedPostCard({ post, onDelete, onUpdate, onLikeToggle }: FeedPos
       if (connectionStatus === 'none') {
         // Send connection request
         await connectionService.sendConnectionRequest(post.author.id);
-        setConnectionStatus('pending');
+        setConnectionStatus('pending_sent');
         success('Connection request sent!');
       }
     } catch (err: any) {
@@ -112,7 +112,8 @@ export function FeedPostCard({ post, onDelete, onUpdate, onLikeToggle }: FeedPos
           </Button>
         );
       
-      case 'pending':
+      case 'pending_sent':
+      case 'pending_received':
         return (
           <Button variant="outline" size="sm" disabled>
             <Clock className="h-4 w-4 mr-1.5" />
@@ -120,13 +121,8 @@ export function FeedPostCard({ post, onDelete, onUpdate, onLikeToggle }: FeedPos
           </Button>
         );
       
-      case 'accepted':
-        return (
-          <Button variant="outline" size="sm" disabled>
-            <UserCheck className="h-4 w-4 mr-1.5" />
-            Connected
-          </Button>
-        );
+      case 'blocked':
+        return null; // Don't show any button if blocked
       
       default:
         return (
@@ -167,7 +163,7 @@ export function FeedPostCard({ post, onDelete, onUpdate, onLikeToggle }: FeedPos
               </Link>
 
               {post.author?.is_verified && (
-                <Badge variant="primary" className="text-xs">
+                <Badge variant="success" className="text-xs">
                   <Shield className="h-3 w-3 mr-1" />
                   Verified
                 </Badge>

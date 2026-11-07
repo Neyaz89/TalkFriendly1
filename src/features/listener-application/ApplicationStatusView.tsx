@@ -85,7 +85,7 @@ export function ApplicationStatusView({ application, history }: ApplicationStatu
         </div>
 
         {/* Admin Feedback (if exists) */}
-        {application.admin_notes && (
+        {(application.review_notes || application.rejection_reason) && (
           <div className="bg-white rounded-2xl border border-gray-200 p-6">
             <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
               <Mail className="h-5 w-5 text-primary" />
@@ -93,7 +93,7 @@ export function ApplicationStatusView({ application, history }: ApplicationStatu
             </h3>
             <div className="bg-gray-50 rounded-lg p-4">
               <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                {application.admin_notes}
+                {application.review_notes || application.rejection_reason}
               </p>
             </div>
           </div>

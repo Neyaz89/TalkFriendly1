@@ -12,7 +12,6 @@
 
 import { createClient as createBrowserClient } from '@/lib/supabase/client';
 import { createClient as createServerClient } from '@/lib/supabase/server';
-import { googleMeetService } from './google-meet.service';
 import type {
   AttendanceEvent,
   ParticipantSession,
@@ -80,6 +79,18 @@ export const attendanceService = {
       }
 
       appointmentId = conference.appointment_id;
+
+      // Null check for TypeScript
+      if (!appointmentId) {
+        errors.push('Appointment ID is null');
+        return {
+          success: false,
+          event_type: event.eventType,
+          appointment_id: null,
+          action_taken: 'invalid_appointment_id',
+          errors,
+        };
+      }
 
       // Process based on event type
       if (event.conferenceStarted) {
@@ -385,15 +396,23 @@ export const attendanceService = {
     }
 
     // Get appointment participants
-    const { data: appointment } = await supabase
+    const { data: appointmentRaw } = await supabase
       .from('appointments')
-      .select('patient_id, psychiatrist_id, patient:profiles!patient_id(*), psychiatrist:profiles!psychiatrist_id(*)')
+      .select('patient_id, psychiatrist_id, patient:profiles!patient_id(id, email, full_name), psychiatrist:profiles!psychiatrist_id(id, email, full_name)')
       .eq('id', appointmentId)
       .single();
 
-    if (!appointment) {
+    if (!appointmentRaw) {
       return;
     }
+
+    // Cast to typed shape - Supabase returns joined relations as arrays but .single() makes them objects
+    const appointment = appointmentRaw as unknown as {
+      patient_id: string;
+      psychiatrist_id: string;
+      patient: { id: string; email: string; full_name: string } | null;
+      psychiatrist: { id: string; email: string; full_name: string } | null;
+    };
 
     let mappedUserId: string | null = null;
     let confidence: MappingConfidence = 'unknown';
@@ -451,7 +470,9 @@ export const attendanceService = {
   },
 
   /**
-   * Reconcile appointment attendance with final Google Meet data
+   * Reconcile appointment attendance from stored participant sessions
+   * Note: Since we use Jitsi (no server-side API), reconciliation is done
+   * entirely from the attendance_events and participant_sessions already in DB.
    */
   async reconcileAppointmentAttendance(
     request: ReconciliationRequest,
@@ -474,7 +495,7 @@ export const attendanceService = {
     };
 
     try {
-      // Get appointment and conference details
+      // Get appointment details
       const { data: appointment } = await supabase
         .from('appointments')
         .select('*, google_meet_conference:google_meet_conferences(*)')
@@ -486,89 +507,46 @@ export const attendanceService = {
         return result;
       }
 
-      const conference = appointment.google_meet_conference;
-      if (!conference || !conference.conference_record_name) {
-        result.errors.push('Conference record not available yet');
-        return result;
+      const conference = appointment.google_meet_conference as any;
+
+      // Mark as reconciling
+      if (conference?.id) {
+        await supabase
+          .from('google_meet_conferences')
+          .update({
+            reconciliation_status: 'in_progress',
+            reconciliation_attempted_at: new Date().toISOString(),
+            reconciliation_attempts: (conference.reconciliation_attempts || 0) + 1,
+          })
+          .eq('id', conference.id);
       }
 
-      // Update reconciliation status
-      await supabase
-        .from('google_meet_conferences')
-        .update({
-          reconciliation_status: 'in_progress',
-          reconciliation_attempted_at: new Date().toISOString(),
-          reconciliation_attempts: conference.reconciliation_attempts + 1,
-        })
-        .eq('id', conference.id);
+      // Use existing participant_sessions already stored from Jitsi webhook events
+      const { data: sessions } = await supabase
+        .from('participant_sessions')
+        .select('*')
+        .eq('appointment_id', request.appointment_id);
 
-      // Fetch final conference record from Google
-      const conferenceRecord = await googleMeetService.getConferenceRecord(
-        conference.conference_record_name
-      );
+      result.conference_record_found = true; // We use local DB records
+      result.participant_sessions_count = sessions?.length || 0;
 
-      if (!conferenceRecord) {
-        result.errors.push('Could not retrieve conference record from Google');
-        await this.markReconciliationFailed(conference.id, 'Conference record not found');
-        return result;
+      if (!sessions || sessions.length === 0) {
+        result.warnings.push('No participant sessions found in database');
       }
 
-      result.conference_record_found = true;
-
-      // Fetch all participant sessions from Google
-      const allParticipantSessions = await googleMeetService.getAllParticipantSessions(
-        conference.conference_record_name
-      );
-
-      if (allParticipantSessions.length === 0) {
-        result.warnings.push('No participant sessions found');
+      // Determine attendance from stored sessions
+      for (const session of sessions || []) {
+        if (session.participant_role === 'patient') result.patient_attended = true;
+        if (session.participant_role === 'psychiatrist') result.psychiatrist_attended = true;
       }
 
-      // Process each participant and their sessions
-      for (const { participant, sessions } of allParticipantSessions) {
-        const identity = googleMeetService.extractParticipantIdentity(participant);
-
-        // Try to map this participant to appointment users
-        const mappingResult = await this.mapGoogleParticipant(
-          request.appointment_id,
-          participant,
-          identity
-        );
-
-        // Store participant sessions
-        for (const session of sessions) {
-          if (mappingResult.mapped_user_id) {
-            const role = mappingResult.mapped_user_id === appointment.patient_id
-              ? 'patient'
-              : 'psychiatrist';
-
-            await supabase.from('participant_sessions').insert({
-              appointment_id: request.appointment_id,
-              user_id: mappingResult.mapped_user_id,
-              participant_role: role,
-              joined_at: session.startTime,
-              left_at: session.endTime,
-              source: 'google_meet',
-              google_session_id: session.name.split('/').pop(),
-            });
-
-            result.participant_sessions_count++;
-
-            if (role === 'patient') result.patient_attended = true;
-            if (role === 'psychiatrist') result.psychiatrist_attended = true;
-          }
-        }
-      }
-
-      // Calculate billable duration
+      // Calculate billable duration from overlapping sessions
       const billableCalculation = await this.calculateBillableDuration(request.appointment_id);
       result.billable_duration_minutes = billableCalculation.total_billable_minutes;
 
       // Update appointment status based on attendance
       let newStatus = 'completed';
-      if (!result.patient_attended && !result.psychiatrist_attended) {
-        newStatus = 'no_show';
-      } else if (!result.patient_attended || !result.psychiatrist_attended) {
+      if (!result.patient_attended || !result.psychiatrist_attended) {
         newStatus = 'no_show';
       }
 
@@ -578,21 +556,23 @@ export const attendanceService = {
         .eq('id', request.appointment_id);
 
       // Mark reconciliation as complete
-      await supabase
-        .from('google_meet_conferences')
-        .update({
-          conference_state: 'reconciled',
-          reconciliation_status: 'completed',
-          reconciliation_completed_at: new Date().toISOString(),
-        })
-        .eq('id', conference.id);
+      if (conference?.id) {
+        await supabase
+          .from('google_meet_conferences')
+          .update({
+            conference_state: 'reconciled',
+            reconciliation_status: 'completed',
+            reconciliation_completed_at: new Date().toISOString(),
+          })
+          .eq('id', conference.id);
+      }
 
       result.success = true;
       return result;
     } catch (error) {
       console.error('Reconciliation error:', error);
       result.errors.push(`Reconciliation failed: ${error}`);
-      
+
       const { data: conference } = await supabase
         .from('google_meet_conferences')
         .select('id')
@@ -726,19 +706,27 @@ export const attendanceService = {
       : createBrowserClient();
 
     // Get appointment participants
-    const { data: appointment } = await supabase
+    const { data: appointmentRaw2 } = await supabase
       .from('appointments')
-      .select('patient_id, psychiatrist_id, patient:profiles!patient_id(*), psychiatrist:profiles!psychiatrist_id(*)')
+      .select('patient_id, psychiatrist_id, patient:profiles!patient_id(id, email, full_name), psychiatrist:profiles!psychiatrist_id(id, email, full_name)')
       .eq('id', appointmentId)
       .single();
 
-    if (!appointment) {
+    if (!appointmentRaw2) {
       return {
         mapped_user_id: null,
         confidence: 'unknown',
         matching_method: 'none',
       };
     }
+
+    // Cast to typed shape
+    const appointment = appointmentRaw2 as unknown as {
+      patient_id: string;
+      psychiatrist_id: string;
+      patient: { id: string; email: string; full_name: string } | null;
+      psychiatrist: { id: string; email: string; full_name: string } | null;
+    };
 
     // Try email matching first
     if (identity.email) {

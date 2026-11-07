@@ -102,7 +102,7 @@ export function DoctorFilters({ currentFilters, onFilterChange }: DoctorFiltersP
           <Filter className="h-4 w-4" />
           <span>Filters</span>
           {hasActiveFilters && (
-            <Badge variant="primary" className="text-xs">
+            <Badge variant="default" className="text-xs">
               {[selectedSpecs.length, selectedLangs.length, minRating > 0 ? 1 : 0].filter(Boolean).reduce((a, b) => a + b, 0)}
             </Badge>
           )}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { MessageWithSender } from "@/types";
+import type { MessageWithSender } from "@/types/chat.types";
 import { Avatar } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatDistanceToNow, format } from "date-fns";

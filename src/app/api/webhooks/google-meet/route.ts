@@ -6,7 +6,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { attendanceService } from '@/services/attendance.service';
-import { googleMeetService } from '@/services/google-meet.service';
 import type { GoogleMeetWebhookEvent } from '@/types';
 
 // POST /api/webhooks/google-meet

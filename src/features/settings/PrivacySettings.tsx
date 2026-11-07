@@ -31,9 +31,9 @@ export function PrivacySettings() {
     try {
       const { blocks } = await blockService.getBlockedUsers();
       setBlockedUsers(blocks);
-    } catch (error) {
-      console.error('Error loading blocked users:', error);
-      error( 'Failed to load blocked users');
+    } catch (err) {
+      console.error('Error loading blocked users:', err);
+      error('Failed to load blocked users');
     } finally {
       setLoading(false);
     }
@@ -47,10 +47,10 @@ export function PrivacySettings() {
     try {
       await blockService.unblockUser(userId);
       setBlockedUsers(prev => prev.filter(u => u.blocked_user?.id !== userId));
-      success( 'User unblocked successfully');
-    } catch (error: any) {
-      console.error('Error unblocking user:', error);
-      error( error.message || 'Failed to unblock user');
+      success('User unblocked successfully');
+    } catch (err: any) {
+      console.error('Error unblocking user:', err);
+      error(err.message || 'Failed to unblock user');
     } finally {
       setUnblocking(null);
     }

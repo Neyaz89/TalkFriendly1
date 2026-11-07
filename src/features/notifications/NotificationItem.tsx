@@ -26,15 +26,15 @@ export function NotificationItem({ notification, onMarkAsRead, onDelete }: Notif
   const actor = notification.actor;
 
   const getNotificationIcon = () => {
-    switch (notification.type) {
+    switch (notification.notification_type) {
       case 'connection_request':
       case 'connection_accepted':
         return <UserPlus className="h-5 w-5 text-primary-500" />;
-      case 'post_like':
+      case 'like':
         return <Heart className="h-5 w-5 text-red-500" />;
-      case 'post_comment':
+      case 'comment':
         return <MessageCircle className="h-5 w-5 text-blue-500" />;
-      case 'new_review':
+      case 'review':
         return <Star className="h-5 w-5 text-yellow-500" />;
       default:
         return <Bell className="h-5 w-5 text-gray-500" />;
@@ -42,27 +42,27 @@ export function NotificationItem({ notification, onMarkAsRead, onDelete }: Notif
   };
 
   const handleClick = () => {
-    if (!notification.read) {
+    if (!notification.is_read) {
       onMarkAsRead(notification.id);
     }
 
     // Navigate based on notification type
-    if (notification.action_url) {
-      router.push(notification.action_url);
+    if (notification.link) {
+      router.push(notification.link);
     } else {
-      switch (notification.type) {
+      switch (notification.notification_type) {
         case 'connection_request':
         case 'connection_accepted':
           router.push('/connections');
           break;
-        case 'post_like':
-        case 'post_comment':
+        case 'like':
+        case 'comment':
           router.push('/feed');
           break;
-        case 'new_message':
+        case 'message':
           router.push('/messages');
           break;
-        case 'new_review':
+        case 'review':
           router.push('/doctors');
           break;
       }
@@ -74,7 +74,7 @@ export function NotificationItem({ notification, onMarkAsRead, onDelete }: Notif
       className={`
         bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4
         hover:shadow-md transition-all cursor-pointer
-        ${!notification.read ? 'border-l-4 border-l-primary-500 bg-primary-50/50 dark:bg-primary-900/10' : ''}
+        ${!notification.is_read ? 'border-l-4 border-l-primary-500 bg-primary-50/50 dark:bg-primary-900/10' : ''}
       `}
       onClick={handleClick}
     >
@@ -99,9 +99,9 @@ export function NotificationItem({ notification, onMarkAsRead, onDelete }: Notif
           <p className="text-sm text-gray-900 dark:text-white mb-1">
             {notification.title}
           </p>
-          {notification.body && (
+          {notification.message && (
             <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-              {notification.body}
+              {notification.message}
             </p>
           )}
           <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
@@ -111,7 +111,7 @@ export function NotificationItem({ notification, onMarkAsRead, onDelete }: Notif
 
         {/* Actions */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          {!notification.read && (
+          {!notification.is_read && (
             <Button
               variant="ghost"
               size="sm"

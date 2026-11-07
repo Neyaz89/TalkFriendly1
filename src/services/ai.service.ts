@@ -3,7 +3,7 @@
  * Simulates streaming AI responses (FastAPI with SSE in production).
  */
 
-import type { ChatMessage, Conversation, SendMessagePayload, AiInsight, ConversationSummary } from "@/types";
+import type { ChatMessage, Conversation, SendMessagePayload, AiInsight, ConversationSummary } from "@/types/ai.types";
 import { MOCK_AI_RESPONSES, MOCK_SUGGESTIONS, MOCK_CONVERSATIONS, MOCK_AI_INSIGHTS } from "@/mocks/ai.mock";
 import { delay, generateId } from "@/lib/utils";
 

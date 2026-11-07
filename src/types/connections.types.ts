@@ -2,17 +2,19 @@
  * Types for Connections and Messaging System
  */
 
+import type { Database } from './database.types';
+
 // ============================================================================
 // Connection Types
 // ============================================================================
 
-export type ConnectionStatus = 'pending' | 'accepted' | 'rejected' | 'blocked';
+export type UserConnectionStatus = 'pending' | 'accepted' | 'rejected' | 'blocked';
 
 export interface UserConnection {
   id: string;
   user_id: string;
   connected_user_id: string;
-  status: ConnectionStatus;
+  status: UserConnectionStatus;
   initiated_by: string;
   created_at: string;
   updated_at: string;
@@ -40,26 +42,19 @@ export interface ConnectionRequestResponse {
     avatar_url: string | null;
     profession: string | null;
   };
-  status: ConnectionStatus;
+  status: UserConnectionStatus;
   created_at: string;
 }
 
 // ============================================================================
-// Conversation Types
+// Conversation and Message Types (using database types as base)
 // ============================================================================
 
-export interface Conversation {
-  id: string;
-  participant_1_id: string;
-  participant_2_id: string;
-  last_message_at: string | null;
-  last_message_preview: string | null;
-  participant_1_unread_count: number;
-  participant_2_unread_count: number;
-  created_at: string;
-  updated_at: string;
-}
+// Base types from database
+export type Conversation = Database['public']['Tables']['conversations']['Row'];
+export type Message = Database['public']['Tables']['messages']['Row'];
 
+// Extended conversation type with participant details for messaging UI
 export interface ConversationWithDetails extends Conversation {
   other_participant: {
     id: string;
@@ -71,26 +66,7 @@ export interface ConversationWithDetails extends Conversation {
   unread_count: number; // For current user
 }
 
-// ============================================================================
-// Message Types
-// ============================================================================
-
-export type MessageType = 'text' | 'image' | 'file' | 'system';
-
-export interface Message {
-  id: string;
-  conversation_id: string;
-  sender_id: string;
-  content: string;
-  message_type: MessageType;
-  is_read: boolean;
-  read_at: string | null;
-  is_deleted: boolean;
-  deleted_at: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
+// Extended message type with sender details for messaging UI
 export interface MessageWithSender extends Message {
   sender: {
     id: string;
@@ -104,7 +80,7 @@ export interface MessageWithSender extends Message {
 // API Payloads
 // ============================================================================
 
-export interface SendConnectionRequestPayload {
+export interface UserSendConnectionPayload {
   target_user_id: string;
 }
 
@@ -116,8 +92,10 @@ export interface RespondToConnectionPayload {
 export interface SendMessagePayload {
   conversation_id?: string;
   receiver_id?: string; // Either this or conversation_id
-  content: string;
-  message_type?: MessageType;
+  content?: string | null;
+  message_type?: 'text' | 'voice' | 'image' | 'file' | 'system';
+  voice_url?: string | null;
+  voice_duration?: number | null;
 }
 
 export interface MarkMessagesAsReadPayload {
@@ -162,7 +140,7 @@ export interface SendMessageResponse {
 // ============================================================================
 
 export interface ConnectionsFilterParams {
-  status?: ConnectionStatus;
+  status?: UserConnectionStatus;
   search?: string;
   page?: number;
   limit?: number;
@@ -214,6 +192,7 @@ export type MessageEventType =
   | 'new_message'
   | 'message_read'
   | 'message_deleted'
+  | 'message_edited'
   | 'typing_start'
   | 'typing_stop';
 

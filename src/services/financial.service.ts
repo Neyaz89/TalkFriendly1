@@ -652,8 +652,11 @@ export const financialService = {
     const psychiatristMap = new Map<string, { name: string; count: number; earned: number }>();
 
     for (const item of topPsychiatrists || []) {
-      const psychiatristId = item.appointment?.psychiatrist_id;
-      const name = item.appointment?.psychiatrist?.full_name || 'Unknown';
+      // Supabase join returns array; access first element
+      const appointmentData = Array.isArray(item.appointment) ? item.appointment[0] : item.appointment;
+      const psychiatristId = appointmentData?.psychiatrist_id;
+      const psychiatristProfile = Array.isArray(appointmentData?.psychiatrist) ? appointmentData.psychiatrist[0] : appointmentData?.psychiatrist;
+      const name = psychiatristProfile?.full_name || 'Unknown';
       
       if (psychiatristId) {
         if (!psychiatristMap.has(psychiatristId)) {

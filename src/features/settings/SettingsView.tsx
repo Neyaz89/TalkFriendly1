@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { profileService } from "@/services/profile.service";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/hooks/useTheme";
+import { LogoutConfirmDialog } from "@/components/common/LogoutConfirmDialog";
 import type { UserProfile, NotificationSettings, PrivacySettings } from "@/types";
 import { ROUTES } from "@/constants";
 
@@ -83,7 +84,17 @@ export function SettingsView() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [savedMsg, setSavedMsg] = useState("");
+
+  const handleLogoutClick = () => {
+    setShowLogoutDialog(true);
+  };
+
+  const handleLogoutConfirm = async () => {
+    await signOut();
+    setShowLogoutDialog(false);
+  };
 
   useEffect(() => {
     profileService.getProfile().then((d) => {
@@ -317,7 +328,7 @@ export function SettingsView() {
               iconColor="text-muted"
               label="Sign Out"
               description="Sign out of your account"
-              onClick={signOut}
+              onClick={handleLogoutClick}
             />
 
             {/* Delete account */}
@@ -387,6 +398,13 @@ export function SettingsView() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── Logout confirmation modal ─────────────────────────────── */}
+      <LogoutConfirmDialog
+        isOpen={showLogoutDialog}
+        onClose={() => setShowLogoutDialog(false)}
+        onConfirm={handleLogoutConfirm}
+      />
     </div>
   );
 }

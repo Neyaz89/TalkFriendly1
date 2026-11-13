@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(1, "Password is required"),
 });
 
@@ -77,27 +77,28 @@ export function AdminLoginForm() {
           </div>
         )}
 
-        {/* Email Field */}
+        {/* Username Field */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Email Address
+            Admin Username
           </label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
-              type="email"
-              {...register("email")}
+              type="text"
+              {...register("username")}
               className={`
                 w-full pl-10 pr-4 py-3 border rounded-xl
                 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
-                ${errors.email ? "border-red-300" : "border-gray-300"}
+                ${errors.username ? "border-red-300" : "border-gray-300"}
               `}
-              placeholder="admin@example.com"
+              placeholder="Enter admin username"
+              autoComplete="username"
               disabled={isLoading}
             />
           </div>
-          {errors.email && (
-            <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>
+          {errors.username && (
+            <p className="text-sm text-red-600 mt-1">{errors.username.message}</p>
           )}
         </div>
 
@@ -116,7 +117,8 @@ export function AdminLoginForm() {
                 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
                 ${errors.password ? "border-red-300" : "border-gray-300"}
               `}
-              placeholder="Enter your password"
+              placeholder="Enter admin password"
+              autoComplete="current-password"
               disabled={isLoading}
             />
           </div>

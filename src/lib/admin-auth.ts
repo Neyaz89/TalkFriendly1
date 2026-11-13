@@ -4,7 +4,6 @@
  */
 
 import { createClient } from '@/lib/supabase/client';
-import { createClient as createServerClient } from '@/lib/supabase/server';
 import type { AdminUser, AdminPermission } from '@/types/admin.types';
 
 export interface AdminSession {

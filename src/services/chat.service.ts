@@ -84,7 +84,7 @@ export const chatService = {
       .select(`
         *,
         sender:profiles!sender_id(
-          id, username, full_name, avatar_url
+          id, username, full_name, avatar_url, account_type, is_verified
         )
       `)
       .eq('conversation_id', params.conversation_id)
@@ -266,7 +266,7 @@ export const chatService = {
       .select(`
         *,
         sender:profiles!sender_id(
-          id, username, full_name, avatar_url
+          id, username, full_name, avatar_url, account_type, is_verified
         )
       `)
       .eq('id', messageId)
@@ -292,7 +292,7 @@ export const chatService = {
       .select(`
         *,
         sender:profiles!sender_id(
-          id, username, full_name, avatar_url
+          id, username, full_name, avatar_url, account_type, is_verified
         )
       `)
       .eq('conversation_id', conversationId)

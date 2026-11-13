@@ -189,7 +189,7 @@ export const messagingService = {
       .select(
         `
         *,
-        sender:profiles!sender_id(id, username, full_name, avatar_url)
+        sender:profiles!sender_id(id, username, full_name, avatar_url, account_type, is_verified)
       `,
         { count: 'exact' }
       )
@@ -317,7 +317,7 @@ export const messagingService = {
       .select(
         `
         *,
-        sender:profiles!sender_id(id, username, full_name, avatar_url)
+        sender:profiles!sender_id(id, username, full_name, avatar_url, account_type, is_verified)
       `
       )
       .single();

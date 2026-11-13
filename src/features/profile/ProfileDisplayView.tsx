@@ -12,7 +12,13 @@ import {
   Calendar,
   BookOpen,
   Activity,
-  Award
+  Award,
+  Settings,
+  Shield,
+  Bell,
+  HelpCircle,
+  LogOut,
+  ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -20,6 +26,9 @@ import { ROUTES } from "@/constants";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { LogoutConfirmDialog } from "@/components/common/LogoutConfirmDialog";
+import { UserRoleBadge } from "@/components/ui/user-role-badge";
 
 interface Profile {
   id: string;
@@ -30,6 +39,8 @@ interface Profile {
   avatar_url: string | null;
   bio: string | null;
   created_at: string;
+  account_type?: 'user' | 'listener' | 'doctor' | 'admin';
+  is_verified?: boolean;
 }
 
 interface ProfileDisplayViewProps {
@@ -39,11 +50,22 @@ interface ProfileDisplayViewProps {
 
 export function ProfileDisplayView({ user, profile }: ProfileDisplayViewProps) {
   const supabase = createClient();
+  const { signOut } = useAuth();
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [stats, setStats] = useState({
     journalCount: 0,
     moodLogsCount: 0,
     streak: 0,
   });
+
+  const handleLogoutClick = () => {
+    setShowLogoutDialog(true);
+  };
+
+  const handleLogoutConfirm = async () => {
+    await signOut();
+    setShowLogoutDialog(false);
+  };
 
   useEffect(() => {
     loadStats();
@@ -161,7 +183,16 @@ export function ProfileDisplayView({ user, profile }: ProfileDisplayViewProps) {
 
                   {/* Name & Title */}
                   <div className="text-center md:text-left mb-4 md:mb-0">
-                    <h1 className="text-3xl font-bold text-black mb-1">{displayName}</h1>
+                    <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
+                      <h1 className="text-3xl font-bold text-black">{displayName}</h1>
+                      {profile?.account_type && profile.account_type !== 'user' && (
+                        <UserRoleBadge
+                          accountType={profile.account_type}
+                          isVerified={profile.is_verified}
+                          size="lg"
+                        />
+                      )}
+                    </div>
                     {profile?.profession && (
                       <p className="text-lg text-gray-600 flex items-center justify-center md:justify-start gap-2">
                         <Briefcase className="w-4 h-4" />
@@ -193,8 +224,72 @@ export function ProfileDisplayView({ user, profile }: ProfileDisplayViewProps) {
 
           {/* Content Grid */}
           <div className="grid md:grid-cols-3 gap-6">
-            {/* Left Column - Info */}
+            {/* Left Column - Info & Account Menu */}
             <div className="md:col-span-1 space-y-6">
+              {/* Account Menu Card - NEW */}
+              <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+                <div className="px-6 py-4 bg-gradient-to-r from-primary/10 to-primary/5 border-b border-gray-200">
+                  <h2 className="text-lg font-bold text-black">Account</h2>
+                </div>
+                <div className="p-2">
+                  <Link
+                    href={ROUTES.PROFILE_EDIT}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors group"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
+                      <Edit className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-black">Edit Profile</p>
+                      <p className="text-xs text-gray-500">Update your information</p>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  </Link>
+
+                  <Link
+                    href={ROUTES.SETTINGS}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors group"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-purple-50 group-hover:bg-purple-100 flex items-center justify-center transition-colors">
+                      <Settings className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-black">Settings</p>
+                      <p className="text-xs text-gray-500">Preferences & privacy</p>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  </Link>
+
+                  <Link
+                    href={ROUTES.SETTINGS_PRIVACY || ROUTES.SETTINGS}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors group"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-green-50 group-hover:bg-green-100 flex items-center justify-center transition-colors">
+                      <Shield className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-black">Privacy & Security</p>
+                      <p className="text-xs text-gray-500">Manage your data</p>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  </Link>
+
+                  <button
+                    onClick={handleLogoutClick}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 transition-colors group"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-gray-50 group-hover:bg-red-100 flex items-center justify-center transition-colors">
+                      <LogOut className="w-5 h-5 text-gray-600 group-hover:text-red-600 transition-colors" />
+                    </div>
+                    <div className="flex-1 min-w-0 text-left">
+                      <p className="text-sm font-medium text-black group-hover:text-red-600 transition-colors">Log Out</p>
+                      <p className="text-xs text-gray-500 group-hover:text-red-500 transition-colors">Sign out of your account</p>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-red-400 transition-colors" />
+                  </button>
+                </div>
+              </div>
+
               {/* About Card */}
               <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-6">
                 <h2 className="text-lg font-bold text-black mb-4">About</h2>
@@ -351,6 +446,13 @@ export function ProfileDisplayView({ user, profile }: ProfileDisplayViewProps) {
           </div>
         </motion.div>
       </div>
+
+      {/* Logout Confirmation Dialog */}
+      <LogoutConfirmDialog
+        isOpen={showLogoutDialog}
+        onClose={() => setShowLogoutDialog(false)}
+        onConfirm={handleLogoutConfirm}
+      />
     </div>
   );
 }

@@ -5,9 +5,23 @@ import { User, Session } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
+interface Profile {
+  id: string;
+  username: string;
+  full_name: string | null;
+  email: string;
+  avatar_url: string | null;
+  account_type?: 'user' | 'listener' | 'doctor' | 'admin';
+  is_verified?: boolean;
+  profession?: string | null;
+  bio?: string | null;
+  created_at?: string;
+}
+
 interface AuthContextType {
   user: User | null
   session: Session | null
+  profile: Profile | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string, username?: string, fullName?: string, profession?: string, dateOfBirth?: string, ageConfirmed?: boolean, accountType?: 'user' | 'listener') => Promise<void>
@@ -20,9 +34,35 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   const supabase = createClient()
+
+  // Fetch profile data when user changes
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) {
+        setProfile(null)
+        return
+      }
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, username, full_name, email, avatar_url, account_type, is_verified, profession, bio, created_at')
+        .eq('id', user.id)
+        .single()
+
+      if (error) {
+        console.error('Error fetching profile:', error)
+        setProfile(null)
+      } else {
+        setProfile(data)
+      }
+    }
+
+    fetchProfile()
+  }, [user, supabase])
 
   useEffect(() => {
     // Get initial session
@@ -100,25 +140,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
+    try {
+      const { error } = await supabase.auth.signOut()
 
-    if (error) {
-      throw error
+      if (error) {
+        throw error
+      }
+
+      // Clear all React Query caches to prevent data leakage
+      if (typeof window !== 'undefined') {
+        // Dynamic import to avoid SSR issues
+        const { clearAllCaches } = await import('@/lib/react-query');
+        clearAllCaches();
+      }
+
+      // Clear any local storage items (except theme preferences)
+      if (typeof window !== 'undefined') {
+        const theme = localStorage.getItem('theme');
+        localStorage.clear();
+        if (theme) {
+          localStorage.setItem('theme', theme);
+        }
+      }
+
+      router.push('/auth/login')
+      router.refresh()
+    } catch (error) {
+      console.error('Sign out error:', error);
+      throw error;
     }
-
-    router.push('/auth/login')
-    router.refresh()
   }
 
   const refreshUser = async () => {
     const { data: { session } } = await supabase.auth.getSession()
     setSession(session)
     setUser(session?.user ?? null)
+    
+    // Also refresh profile
+    if (session?.user) {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, username, full_name, email, avatar_url, account_type, is_verified, profession, bio, created_at')
+        .eq('id', session.user.id)
+        .single()
+      setProfile(data)
+    } else {
+      setProfile(null)
+    }
   }
 
   const value = {
     user,
     session,
+    profile,
     loading,
     signIn,
     signUp,

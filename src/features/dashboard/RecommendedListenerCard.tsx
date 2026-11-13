@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
+import { UserRoleBadge } from "@/components/ui/user-role-badge";
 import type { Listener } from "@/types";
 import { ROUTES } from "@/constants";
 import { formatPrice } from "@/lib/utils";
@@ -25,12 +26,19 @@ export function RecommendedListenerCard({ listener }: RecommendedListenerCardPro
           <Avatar src={listener.avatar} name={listener.name} size="lg" online={listener.isOnline} />
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
-              <div>
-                <p className="font-semibold text-text">{listener.name}</p>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <p className="font-semibold text-text">{listener.name}</p>
+                  <UserRoleBadge 
+                    accountType="listener"
+                    isVerified={listener.isVerified}
+                    size="sm"
+                  />
+                </div>
                 <p className="text-xs text-muted mt-0.5">{listener.title}</p>
               </div>
               {listener.isVerified && (
-                <Badge variant="success" className="shrink-0">✓ Verified</Badge>
+                <Badge variant="success" className="shrink-0">Verified</Badge>
               )}
             </div>
 

@@ -49,24 +49,8 @@ export async function POST(request: Request) {
       )
     }
 
-    // If sign up successful, also create a profile record
-    if (authData.user) {
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: authData.user.id,
-          username: username || email.split('@')[0],
-          full_name: fullName || '',
-          email: email,
-          account_type: validatedAccountType, // Server-validated account type
-        })
-
-      if (profileError) {
-        console.error('Profile creation error:', profileError)
-        // Don't fail the registration if profile creation fails
-        // The user is still authenticated
-      }
-    }
+    // Profile is automatically created by database trigger (handle_new_user)
+    // No need to manually insert here
 
     return NextResponse.json({
       message: 'Registration successful',

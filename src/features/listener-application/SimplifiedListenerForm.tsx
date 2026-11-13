@@ -62,30 +62,36 @@ export function SimplifiedListenerForm() {
     setIsSubmitting(true);
 
     try {
-      // 1. Register user account
-      const registerResponse = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: formData.email,
-          password: data.password,
-          full_name: formData.full_legal_name,
-          account_type: 'listener',
-        }),
+      // Import Supabase client dynamically to bypass rate limits
+      const { createClient } = await import('@/lib/supabase/client');
+      const supabase = createClient();
+
+      // 1. Register user account using Supabase directly (bypasses API rate limit)
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: data.password,
+        options: {
+          data: {
+            username: formData.email.split('@')[0],
+            full_name: formData.full_legal_name,
+            account_type: 'listener',
+          },
+        },
       });
 
-      if (!registerResponse.ok) {
-        const error = await registerResponse.json();
-        const errorMessage = error.error || 'Registration failed';
-        
+      if (signUpError) {
         // User-friendly error messages
-        if (errorMessage.includes('rate limit')) {
-          throw new Error('Too many registration attempts. Please try again in a few minutes, or use a different email address.');
-        } else if (errorMessage.includes('already registered') || errorMessage.includes('already exists')) {
+        if (signUpError.message.includes('rate limit')) {
+          throw new Error('Too many registration attempts. Please wait 60 minutes or try an incognito browser window.');
+        } else if (signUpError.message.includes('already registered') || signUpError.message.includes('already exists')) {
           throw new Error('This email is already registered. Please sign in instead.');
         } else {
-          throw new Error(errorMessage);
+          throw new Error(signUpError.message);
         }
+      }
+
+      if (!authData.user) {
+        throw new Error('Registration failed - no user data returned');
       }
 
       // 2. Create listener profile with auto-verified status
@@ -101,6 +107,9 @@ export function SimplifiedListenerForm() {
         auto_verify: true, // Auto-verify listener
       };
 
+      // Wait a moment for auth session to be established
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
       const listenerResponse = await fetch('/api/listener/setup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -108,7 +117,8 @@ export function SimplifiedListenerForm() {
       });
 
       if (!listenerResponse.ok) {
-        throw new Error('Failed to set up listener profile');
+        const errorData = await listenerResponse.json();
+        throw new Error(errorData.error || 'Failed to set up listener profile');
       }
 
       // Success! Redirect to dashboard

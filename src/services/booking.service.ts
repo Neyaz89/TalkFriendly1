@@ -5,7 +5,7 @@
 
 import type { Booking, CreateBookingPayload, BookingSlot } from "@/types";
 import { delay, generateId } from "@/lib/utils";
-import { MOCK_LISTENERS } from "@/mocks/listeners.mock";
+import { listenerService } from "./listener.service";
 
 const MOCK_BOOKINGS: Booking[] = [];
 
@@ -26,7 +26,8 @@ export const bookingService = {
   async createBooking(payload: CreateBookingPayload): Promise<Booking> {
     await delay(1000);
 
-    const listener = MOCK_LISTENERS.find((l) => l.id === payload.listenerId);
+    // Fetch real listener from database
+    const listener = await listenerService.getListenerById(payload.listenerId);
     if (!listener) throw new Error("Listener not found");
 
     const endTime = calculateEndTime(payload.startTime, payload.duration);

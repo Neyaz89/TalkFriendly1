@@ -50,7 +50,7 @@ export interface ChatMessage {
   conversation_id: string;
   sender_id: string;
   content: string | null;
-  message_type: 'text' | 'voice' | 'image' | 'file' | 'system';
+  message_type: 'text' | 'voice' | 'image' | 'file' | 'system' | 'support_form_request' | 'feedback_request';
   voice_url: string | null;
   voice_duration: number | null;
   is_read: boolean;
@@ -79,6 +79,8 @@ export interface MessageWithSender extends ChatMessage {
     username: string;
     full_name: string | null;
     avatar_url: string | null;
+    account_type?: string;
+    is_verified?: boolean;
   };
 }
 

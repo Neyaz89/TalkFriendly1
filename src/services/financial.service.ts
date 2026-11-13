@@ -10,8 +10,7 @@
  * - Dispute management
  */
 
-import { createClient as createBrowserClient } from '@/lib/supabase/client';
-import { createClient as createServerClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/client';
 import type {
   SessionFinancial,
   CommissionLedgerEntry,

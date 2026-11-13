@@ -12,6 +12,8 @@ import { Home, Sparkles, BookOpen, Users, User, Newspaper, MessageCircle, Headph
 import { cn } from "@/lib/utils";
 import { ROUTES } from "@/constants";
 
+// Mobile navigation - 5 most important tabs
+// Settings is accessible through Profile page as per new design
 const MOBILE_NAV_ITEMS = [
   { label: "Home",      href: ROUTES.DASHBOARD,    icon: Home          },
   { label: "Listeners", href: ROUTES.LISTENERS,    icon: Headphones    },

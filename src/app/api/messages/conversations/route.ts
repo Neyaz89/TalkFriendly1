@@ -42,8 +42,8 @@ export async function GET(request: NextRequest) {
       .from('conversations')
       .select(`
         *,
-        participant_1:profiles!conversations_participant_1_id_fkey(id, username, full_name, avatar_url, profession),
-        participant_2:profiles!conversations_participant_2_id_fkey(id, username, full_name, avatar_url, profession)
+        participant_1:profiles!conversations_participant_1_id_fkey(id, username, full_name, avatar_url, profession, account_type, is_verified),
+        participant_2:profiles!conversations_participant_2_id_fkey(id, username, full_name, avatar_url, profession, account_type, is_verified)
       `)
       .or(`participant_1_id.eq.${user.id},participant_2_id.eq.${user.id}`)
       .order('last_message_at', { ascending: false });

@@ -1,13 +1,14 @@
 /**
- * Video Conferencing Service (Jitsi Meet)
+ * Video Conferencing Service
  * 
  * Handles video meeting creation for appointments.
- * Using Jitsi Meet - completely free, open-source, no credit card required.
+ * Supports external URLs (Google Meet, Zoom, Teams, etc.) and Jitsi fallback.
  */
 
 import type {
   CreateMeetingResponse,
 } from '@/types';
+import { generateJitsiUrl, validateMeetingUrl, type MeetingProvider } from '@/lib/meeting-url-utils';
 
 // ============================================================================
 // Service Functions
@@ -16,17 +17,15 @@ import type {
 export const videoService = {
   /**
    * Create a new video meeting for an appointment
-   * Using Jitsi Meet - free, no API key needed!
+   * Generates a Jitsi Meet URL as default/fallback
    */
   async createMeeting(appointmentId: string): Promise<CreateMeetingResponse> {
     try {
       console.log('🎥 Creating Jitsi Meet room for appointment:', appointmentId);
 
-      // Generate unique room name
+      // Generate unique Jitsi URL using utility
+      const meetingUri = generateJitsiUrl(appointmentId);
       const roomName = `TalkFriendly-${appointmentId}-${Date.now()}`;
-      
-      // Jitsi Meet URL (using public instance - 100% free)
-      const meetingUri = `https://meet.jit.si/${roomName}`;
 
       console.log('✅ Jitsi Meet room created:', meetingUri);
 
@@ -38,9 +37,23 @@ export const videoService = {
     } catch (error: any) {
       console.error('❌ Error creating video meeting:', error.message);
       
-      // Jitsi is so simple it rarely fails, but just in case
+      // Fallback
       return this.generateMockMeetLink(appointmentId);
     }
+  },
+
+  /**
+   * Validate and prepare external meeting URL
+   * For user-provided meeting links (Google Meet, Zoom, Teams, etc.)
+   */
+  async validateExternalUrl(url: string): Promise<{
+    isValid: boolean;
+    sanitizedUrl?: string;
+    provider?: MeetingProvider;
+    error?: string;
+  }> {
+    const validation = validateMeetingUrl(url);
+    return validation;
   },
 
   /**

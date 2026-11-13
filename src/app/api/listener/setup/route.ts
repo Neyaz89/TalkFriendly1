@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
           languages: ['English'], // Default
           years_of_experience,
           verification_status: auto_verify ? 'verified' : 'unverified',
-          is_available: true, // Allow them to start immediately
+          is_available: true, // Real-time availability
           rating: 0,
         })
         .eq('user_id', user.id);
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
           languages: ['English'], // Default
           years_of_experience,
           verification_status: auto_verify ? 'verified' : 'unverified',
-          is_available: true,
+          is_available: true, // Real-time availability
           rating: 0,
         });
 
@@ -83,7 +83,16 @@ export async function POST(request: NextRequest) {
     if (auto_verify) {
       await supabase
         .from('profiles')
-        .update({ is_verified: true })
+        .update({ 
+          is_verified: true,
+          account_type: 'listener'  // Ensure account_type is set to listener
+        })
+        .eq('id', user.id);
+    } else {
+      // Even if not auto-verifying, ensure account_type is listener
+      await supabase
+        .from('profiles')
+        .update({ account_type: 'listener' })
         .eq('id', user.id);
     }
 
@@ -94,6 +103,7 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
         full_legal_name,
         email,
+        // phone is optional - can be added later in profile settings
         country,
         city,
         professional_title,
@@ -103,7 +113,7 @@ export async function POST(request: NextRequest) {
         languages_spoken: ['English'],
         qualifications: [professional_title],
         educational_institution: 'Not specified',
-        status: auto_verify ? 'approved' : 'draft', // Mark as approved if auto-verify
+        status: auto_verify ? 'approved' : 'draft',
         submitted_at: auto_verify ? new Date().toISOString() : null,
         reviewed_at: auto_verify ? new Date().toISOString() : null,
         verification_documents: [],
@@ -114,6 +124,7 @@ export async function POST(request: NextRequest) {
     // Don't fail if application insert fails (might already exist)
     if (appError && appError.code !== '23505') {
       console.error('Application creation error:', appError);
+      // Don't throw error - listener is already created, application is just for records
     }
 
     return NextResponse.json({

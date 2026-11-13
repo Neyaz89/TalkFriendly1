@@ -15,6 +15,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { UserRoleBadge } from "@/components/ui/user-role-badge";
 import { listenerService } from "@/services/listener.service";
 import type { Listener, ListenerReview } from "@/types";
 import { ROUTES } from "@/constants";
@@ -71,9 +72,11 @@ export function ListenerProfileView({ listenerId }: { listenerId: string }) {
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="text-xl font-bold text-text">{listener.name}</h2>
-                    {listener.isVerified && (
-                      <CheckCircle2 className="h-5 w-5 text-blue-500" aria-label="Verified listener" />
-                    )}
+                    <UserRoleBadge 
+                      accountType="listener"
+                      isVerified={listener.isVerified}
+                      size="md"
+                    />
                   </div>
                   <p className="text-muted text-sm mt-0.5">{listener.title}</p>
                 </div>

@@ -1,6 +1,8 @@
 /**
  * API Route: Respond to Connection Request
  * POST /api/connections/respond
+ * 
+ * Accepts or rejects a connection request and sends notification to requester
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -53,9 +55,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get connection details before updating
+    const { data: connection } = await supabase
+      .from('user_connections')
+      .select('user_id, connected_user_id, initiated_by')
+      .eq('id', body.connection_id)
+      .eq('connected_user_id', user.id)
+      .single();
+
+    if (!connection) {
+      return NextResponse.json(
+        { error: 'Connection not found or you are not authorized' },
+        { status: 404 }
+      );
+    }
+
+    // Get responder profile for notification
+    const { data: responderProfile } = await supabase
+      .from('profiles')
+      .select('username, full_name, avatar_url, account_type')
+      .eq('id', user.id)
+      .single();
+
+    // Update connection status
     const { data, error } = await supabase
       .from('user_connections')
-      .update({ status: body.status })
+      .update({ 
+        status: body.status,
+        responded_at: new Date().toISOString(),
+      })
       .eq('id', body.connection_id)
       .eq('connected_user_id', user.id) // Only receiver can respond
       .select()
@@ -65,9 +93,37 @@ export async function POST(request: NextRequest) {
       throw new Error(`Failed to respond to connection: ${error.message}`);
     }
 
+    // Send notification to the person who sent the request
+    const responderName = responderProfile?.full_name || responderProfile?.username || 'Someone';
+    
+    if (body.status === 'accepted') {
+      // Notify about acceptance
+      await supabase.from('notifications').insert({
+        user_id: connection.initiated_by,
+        notification_type: 'connection_accepted',
+        title: 'Connection Request Accepted',
+        message: `${responderName} accepted your connection request`,
+        data: {
+          connection_id: data.id,
+          responder_id: user.id,
+          responder_name: responderName,
+          responder_avatar: responderProfile?.avatar_url,
+          responder_account_type: responderProfile?.account_type,
+        },
+        link: `/messages/${data.id}`, // Link to conversation
+      });
+
+      console.log(`✅ Connection accepted: ${connection.user_id} ↔ ${connection.connected_user_id}`);
+    } else {
+      console.log(`❌ Connection rejected: ${connection.user_id} ✗ ${connection.connected_user_id}`);
+    }
+
     return NextResponse.json({
       success: true,
       connection: data,
+      message: body.status === 'accepted' 
+        ? 'Connection request accepted' 
+        : 'Connection request rejected',
     });
   } catch (error: any) {
     console.error('❌ Error responding to connection:', error);

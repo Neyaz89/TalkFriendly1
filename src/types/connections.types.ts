@@ -62,6 +62,8 @@ export interface ConversationWithDetails extends Conversation {
     full_name: string | null;
     avatar_url: string | null;
     profession: string | null;
+    account_type?: 'user' | 'listener' | 'doctor' | 'admin';
+    is_verified?: boolean;
   };
   unread_count: number; // For current user
 }
@@ -73,6 +75,8 @@ export interface MessageWithSender extends Message {
     username: string;
     full_name: string | null;
     avatar_url: string | null;
+    account_type?: 'user' | 'listener' | 'doctor' | 'admin';
+    is_verified?: boolean;
   };
 }
 
@@ -93,7 +97,7 @@ export interface SendMessagePayload {
   conversation_id?: string;
   receiver_id?: string; // Either this or conversation_id
   content?: string | null;
-  message_type?: 'text' | 'voice' | 'image' | 'file' | 'system';
+  message_type?: 'text' | 'voice' | 'image' | 'file' | 'system' | 'support_form_request' | 'feedback_request';
   voice_url?: string | null;
   voice_duration?: number | null;
 }

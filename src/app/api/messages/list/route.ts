@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
       .from('messages')
       .select(`
         *,
-        sender:profiles!messages_sender_id_fkey(id, username, full_name, avatar_url)
+        sender:profiles!messages_sender_id_fkey(id, username, full_name, avatar_url, account_type, is_verified)
       `)
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true })

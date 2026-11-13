@@ -8,33 +8,20 @@ import { ConversationList } from "./ConversationList";
 import { ChatInterface } from "./ChatInterface";
 import { PageLoader } from "@/components/common/LoadingSpinner";
 import { MessageCircle } from "lucide-react";
+import { useConversations, useConversationSubscription, useCreateConversation } from "@/hooks/useConversations";
 
 export function ChatView() {
   const searchParams = useSearchParams();
   const doctorParam = searchParams?.get('doctor');
   
-  const [conversations, setConversations] = useState<ConversationWithParticipant[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadConversations();
-    
-    // Subscribe to conversation updates
-    const unsubscribe = conversationService.subscribeToConversations((newConversation) => {
-      setConversations(prev => {
-        const exists = prev.find(c => c.id === newConversation.id);
-        if (exists) {
-          return prev.map(c => c.id === newConversation.id ? newConversation : c);
-        }
-        return [newConversation, ...prev];
-      });
-    });
-
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
-  }, []);
+  
+  // Use React Query hooks for caching
+  const { data: conversations = [], isLoading: loading, refetch } = useConversations();
+  const createConversationMutation = useCreateConversation();
+  
+  // Subscribe to real-time updates
+  useConversationSubscription();
 
   useEffect(() => {
     // Auto-create conversation with doctor if specified in URL
@@ -51,48 +38,19 @@ export function ChatView() {
     }
   }, [doctorParam, loading, conversations]);
 
-  const loadConversations = async () => {
-    try {
-      const data = await conversationService.getConversations();
-      setConversations(data || []);
-      
-      // Auto-select first conversation if available
-      if (data && data.length > 0 && !selectedConversationId) {
-        setSelectedConversationId(data[0].id);
-      }
-    } catch (error: any) {
-      // Log detailed error for debugging
-      console.error('Error loading conversations:', {
-        error,
-        message: error?.message,
-        code: error?.code,
-        details: error?.details,
-        hint: error?.hint,
-        statusText: error?.statusText,
-      });
-      
-      // Set empty array on error so UI shows "no conversations" instead of loading forever
-      setConversations([]);
-      
-      // If it's a database error (table doesn't exist), show helpful message
-      if (error?.message?.includes('relation') || 
-          error?.code === '42P01' || 
-          error?.message?.includes('does not exist') ||
-          error?.message?.includes('conversations')) {
-        console.warn('⚠️ Database migration needed! Please run: migrations/004_social_chat_system.sql');
-      }
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    // Auto-select first conversation if available and none selected
+    if (conversations && conversations.length > 0 && !selectedConversationId) {
+      setSelectedConversationId(conversations[0].id);
     }
-  };
+  }, [conversations, selectedConversationId]);
 
   const createDoctorConversation = async (doctorId: string) => {
     try {
-      const conversation = await conversationService.getOrCreateConversation({
+      const conversation = await createConversationMutation.mutateAsync({
         participant_id: doctorId,
       });
       setSelectedConversationId(conversation.id);
-      await loadConversations();
     } catch (error) {
       console.error('Error creating doctor conversation:', error);
     }
@@ -142,7 +100,7 @@ export function ChatView() {
               conversations={conversations}
               selectedConversationId={selectedConversationId}
               onSelectConversation={setSelectedConversationId}
-              onConversationUpdated={loadConversations}
+              onConversationUpdated={() => refetch()}
             />
           </div>
 

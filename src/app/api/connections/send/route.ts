@@ -1,6 +1,8 @@
 /**
  * API Route: Send Connection Request
  * POST /api/connections/send
+ * 
+ * Creates a connection request and sends a notification to the target user
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -46,6 +48,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Prevent self-connection
+    if (user.id === body.target_user_id) {
+      return NextResponse.json(
+        { error: 'Cannot send connection request to yourself' },
+        { status: 400 }
+      );
+    }
+
+    // Get sender profile for notification
+    const { data: senderProfile } = await supabase
+      .from('profiles')
+      .select('username, full_name, avatar_url, account_type')
+      .eq('id', user.id)
+      .single();
+
+    // Get target user profile
+    const { data: targetProfile } = await supabase
+      .from('profiles')
+      .select('username, full_name, account_type')
+      .eq('id', body.target_user_id)
+      .single();
+
+    if (!targetProfile) {
+      return NextResponse.json(
+        { error: 'Target user not found' },
+        { status: 404 }
+      );
+    }
+
     // Check if connection already exists
     const { data: existing } = await supabase
       .from('user_connections')
@@ -78,9 +109,39 @@ export async function POST(request: NextRequest) {
       throw new Error(`Failed to send connection request: ${error.message}`);
     }
 
+    // Create notification for the target user
+    const senderName = senderProfile?.full_name || senderProfile?.username || 'Someone';
+    const isListenerRequest = targetProfile.account_type === 'listener';
+    
+    const notificationTitle = isListenerRequest
+      ? 'New Connection Request'
+      : 'New Connection Request';
+    
+    const notificationMessage = isListenerRequest
+      ? `${senderName} wants to connect with you as a listener`
+      : `${senderName} wants to connect with you`;
+
+    await supabase.from('notifications').insert({
+      user_id: body.target_user_id,
+      notification_type: 'connection_request',
+      title: notificationTitle,
+      message: notificationMessage,
+      data: {
+        connection_id: data.id,
+        sender_id: user.id,
+        sender_name: senderName,
+        sender_avatar: senderProfile?.avatar_url,
+        sender_account_type: senderProfile?.account_type,
+      },
+      link: `/connections/requests`,
+    });
+
+    console.log(`✅ Connection request sent from ${user.id} to ${body.target_user_id}`);
+
     return NextResponse.json({
       success: true,
       connection: data,
+      message: 'Connection request sent successfully',
     });
   } catch (error: any) {
     console.error('❌ Error sending connection request:', error);

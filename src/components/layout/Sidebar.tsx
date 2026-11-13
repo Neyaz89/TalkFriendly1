@@ -5,7 +5,7 @@
  * Responsive: collapses to icon-only on small screens, drawer on mobile.
  */
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils";
 import { ROUTES } from "@/constants";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/ui/avatar";
+import { LogoutConfirmDialog } from "@/components/common/LogoutConfirmDialog";
 
 const NAV_ITEMS = [
   { label: "Home", href: ROUTES.DASHBOARD, icon: Home },
@@ -58,6 +59,16 @@ interface SidebarProps {
 export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const { user, signOut } = useAuth();
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+
+  const handleLogoutClick = () => {
+    setShowLogoutDialog(true);
+  };
+
+  const handleLogoutConfirm = async () => {
+    await signOut();
+    setShowLogoutDialog(false);
+  };
 
   return (
     <motion.aside
@@ -201,7 +212,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             )}
             {!isCollapsed && (
               <button
-                onClick={() => signOut()}
+                onClick={handleLogoutClick}
                 className="p-1.5 rounded-lg hover:bg-gray-100 text-muted hover:text-text transition-colors"
                 aria-label="Sign out"
                 title="Sign out"
@@ -212,6 +223,13 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           </div>
         )}
       </div>
+
+      {/* Logout Confirmation Dialog */}
+      <LogoutConfirmDialog
+        isOpen={showLogoutDialog}
+        onClose={() => setShowLogoutDialog(false)}
+        onConfirm={handleLogoutConfirm}
+      />
     </motion.aside>
   );
 }

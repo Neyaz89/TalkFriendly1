@@ -6,11 +6,16 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { Send, Loader2, ArrowLeft } from 'lucide-react';
+import { Send, Loader2, ArrowLeft, MoreVertical } from 'lucide-react';
 import Image from 'next/image';
 import type { ConversationWithDetails, MessageWithSender } from '@/types';
 import { messagingService } from '@/services/messaging.service';
 import { formatDistanceToNow } from '@/lib/date-utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { UserRoleBadge } from '@/components/ui/user-role-badge';
+import { ListenerChatActions } from '@/features/chat/ListenerChatActions';
+import { Button } from '@/components/ui/button';
+import { BookingFormMessage } from '@/features/chat/BookingFormMessage';
 
 interface ChatWindowProps {
   conversation: ConversationWithDetails;
@@ -29,6 +34,7 @@ export default function ChatWindow({
   const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const { profile } = useAuth(); // Get profile to check if listener
 
   useEffect(() => {
     fetchMessages();
@@ -177,39 +183,60 @@ export default function ChatWindow({
     <div className="flex flex-col h-full bg-white">
       {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b border-gray-200">
-        {onBack && (
-          <button
-            onClick={onBack}
-            className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-        )}
+        <div className="flex items-center gap-3 flex-1">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          )}
 
-        {conversation.other_participant.avatar_url ? (
-          <Image
-            src={conversation.other_participant.avatar_url}
-            alt={conversation.other_participant.username}
-            width={40}
-            height={40}
-            className="rounded-full object-cover"
-          />
-        ) : (
-          <div className="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center">
-            <span className="text-white font-semibold">
-              {conversation.other_participant.username.charAt(0).toUpperCase()}
-            </span>
+          {conversation.other_participant.avatar_url ? (
+            <Image
+              src={conversation.other_participant.avatar_url}
+              alt={conversation.other_participant.username}
+              width={40}
+              height={40}
+              className="rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center">
+              <span className="text-white font-semibold">
+                {conversation.other_participant.username.charAt(0).toUpperCase()}
+              </span>
+            </div>
+          )}
+
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-gray-900">
+                {conversation.other_participant.full_name ||
+                  conversation.other_participant.username}
+              </h3>
+              <UserRoleBadge 
+                accountType={conversation.other_participant.account_type as any}
+                isVerified={conversation.other_participant.is_verified}
+                size="sm"
+              />
+            </div>
+            <p className="text-sm text-gray-500">
+              {conversation.other_participant.profession || '👤 User'}
+            </p>
           </div>
-        )}
+        </div>
 
-        <div>
-          <h3 className="font-semibold text-gray-900">
-            {conversation.other_participant.full_name ||
-              conversation.other_participant.username}
-          </h3>
-          <p className="text-sm text-gray-500">
-            {conversation.other_participant.profession || '👤 User'}
-          </p>
+        {/* Listener Actions */}
+        <div className="flex items-center gap-2">
+          <ListenerChatActions
+            conversationId={conversation.id}
+            isListener={profile?.account_type === 'listener'}
+          />
+
+          <Button variant="ghost" size="sm">
+            <MoreVertical className="h-5 w-5" />
+          </Button>
         </div>
       </div>
 
@@ -239,27 +266,95 @@ export default function ChatWindow({
               {/* Messages */}
               {dateMessages.map((message) => {
                 const isOwn = message.sender_id === currentUserId;
+                const sender = message.sender;
 
+                // Handle special message type: session_booking_form
+                if (message.message_type === 'session_booking_form') {
+                  try {
+                    const payload = JSON.parse(message.content || '{}');
+                    return (
+                      <div
+                        key={message.id}
+                        className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4`}
+                      >
+                        <div className="flex flex-col gap-1 max-w-[80%]">
+                          {/* Sender name with badge (only for other user's messages) */}
+                          {!isOwn && sender && (
+                            <div className="flex items-center gap-1.5 px-3">
+                              <span className="text-xs text-gray-600">
+                                {sender.full_name || sender.username || 'User'}
+                              </span>
+                              <UserRoleBadge 
+                                accountType={sender.account_type as any}
+                                isVerified={sender.is_verified}
+                                size="sm"
+                              />
+                            </div>
+                          )}
+                          
+                          <BookingFormMessage
+                            payload={payload}
+                            isOwnMessage={isOwn}
+                            onBook={() => {
+                              // Reload messages to show updated booking status
+                              fetchMessages();
+                            }}
+                          />
+
+                          <span
+                            className={`text-xs px-3 ${
+                              isOwn ? 'text-gray-500 text-right' : 'text-gray-500'
+                            }`}
+                          >
+                            {formatDistanceToNow(new Date(message.created_at))}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  } catch (error) {
+                    console.error('Error parsing booking form message:', error);
+                    // Fall through to regular message rendering
+                  }
+                }
+
+                // Regular message rendering
                 return (
                   <div
                     key={message.id}
                     className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-2`}
                   >
-                    <div
-                      className={`max-w-[70%] ${
-                        isOwn
-                          ? 'bg-primary-600 text-white'
-                          : 'bg-gray-100 text-gray-900'
-                      } rounded-lg px-4 py-2`}
-                    >
-                      <p className="text-sm break-words">{message.content}</p>
-                      <p
-                        className={`text-xs mt-1 ${
-                          isOwn ? 'text-primary-100' : 'text-gray-500'
-                        }`}
+                    <div className="flex flex-col gap-1 max-w-[70%]">
+                      {/* Sender name with badge (only for other user's messages) */}
+                      {!isOwn && sender && (
+                        <div className="flex items-center gap-1.5 px-3">
+                          <span className="text-xs text-gray-600">
+                            {sender.full_name || sender.username || 'User'}
+                          </span>
+                          <UserRoleBadge 
+                            accountType={sender.account_type as any}
+                            isVerified={sender.is_verified}
+                            size="sm"
+                          />
+                        </div>
+                      )}
+                      
+                      {/* Message bubble */}
+                      <div
+                        className={`${
+                          isOwn
+                            ? 'bg-primary-600 text-white'
+                            : 'bg-gray-100 text-gray-900'
+                        } rounded-lg px-4 py-2`}
                       >
-                        {formatDistanceToNow(new Date(message.created_at))}
-                      </p>
+                        <p className="text-sm break-words">{message.content}</p>
+                        <p
+                          className={`text-xs mt-1 ${
+                            isOwn ? 'text-primary-100' : 'text-gray-500'
+                          }`}
+                        >
+                          {formatDistanceToNow(new Date(message.created_at))}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 );

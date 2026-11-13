@@ -4,7 +4,6 @@
  */
 
 import { createClient } from '@/lib/supabase/client';
-import { createClient as createServerClient } from '@/lib/supabase/server';
 
 export type VerificationStatus = 'draft' | 'pending_review' | 'additional_info_required' | 'approved' | 'rejected' | 'verified' | 'unverified';
 

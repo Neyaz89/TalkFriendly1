@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { QueryClientProvider } from "@/components/providers/QueryClientProvider";
 import { PwaInstallBanner } from "@/components/common/PwaInstallBanner";
 import "./globals.css";
 
@@ -47,12 +48,14 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={inter.variable}>
       <body className="antialiased">
-        <ThemeProvider>
-          <AuthProvider>
-            {children}
-            <PwaInstallBanner />
-          </AuthProvider>
-        </ThemeProvider>
+        <QueryClientProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              {children}
+              <PwaInstallBanner />
+            </AuthProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
       </body>
     </html>
   );

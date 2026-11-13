@@ -7,8 +7,8 @@ import type { DashboardData } from "@/types";
 import { MOCK_MOOD_ENTRIES } from "@/mocks/moods.mock";
 import { MOCK_JOURNAL_ENTRIES } from "@/mocks/journals.mock";
 import { MOCK_CIRCLES } from "@/mocks/events.mock";
-import { MOCK_LISTENERS } from "@/mocks/listeners.mock";
 import { MOCK_COMMUNITIES } from "@/mocks/communities.mock";
+import { listenerService } from "./listener.service";
 import { delay } from "@/lib/utils";
 
 export const dashboardService = {
@@ -18,6 +18,10 @@ export const dashboardService = {
    */
   async getDashboard(): Promise<DashboardData> {
     await delay(600);
+
+    // Fetch a real recommended listener
+    const recommendedListeners = await listenerService.getRecommended(1);
+    const recommendedListener = recommendedListeners[0] || null;
 
     return {
       user: {
@@ -33,7 +37,7 @@ export const dashboardService = {
       recentJournal: MOCK_JOURNAL_ENTRIES[0],
       journalCount: 47,
       upcomingCircles: MOCK_CIRCLES.slice(0, 2),
-      recommendedListener: MOCK_LISTENERS[0],
+      recommendedListener, // Now uses real listener data
       recommendedCommunities: MOCK_COMMUNITIES.slice(0, 3),
       quickActions: [
         {

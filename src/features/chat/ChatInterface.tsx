@@ -16,7 +16,16 @@ import {
 } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { VoiceRecorder } from "./VoiceRecorder";
+import { ListenerChatActions } from "./ListenerChatActions";
 import { useToast } from "@/hooks/useToast";
+import { useAuth } from "@/contexts/AuthContext";
+import { 
+  useMessages, 
+  useSendMessage, 
+  useMarkMessagesRead, 
+  useMessageSubscription 
+} from "@/hooks/useMessages";
+import { useConversation } from "@/hooks/useConversations";
 
 interface ChatInterfaceProps {
   conversationId: string;
@@ -24,70 +33,37 @@ interface ChatInterfaceProps {
 }
 
 export function ChatInterface({ conversationId, onBack }: ChatInterfaceProps) {
-  const [conversation, setConversation] = useState<ConversationWithParticipant | null>(null);
-  const [messages, setMessages] = useState<MessageWithSender[]>([]);
   const [messageText, setMessageText] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
   const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { success, error: showError } = useToast();
+  const { user, profile } = useAuth(); // Get profile from AuthContext
+
+  // Use React Query hooks for data fetching with caching
+  const { data: conversation } = useConversation(conversationId);
+  const { data: messages = [], isLoading: loading } = useMessages(conversationId);
+  const sendMessageMutation = useSendMessage();
+  const markAsReadMutation = useMarkMessagesRead();
+
+  // Debug logging
+  useEffect(() => {
+    console.log('ChatInterface - Profile:', profile);
+    console.log('ChatInterface - Is Listener:', profile?.account_type === 'listener');
+  }, [profile]);
+
+  // Subscribe to real-time message updates
+  useMessageSubscription(conversationId);
 
   useEffect(() => {
-    loadConversation();
-    loadMessages();
-    markAsRead();
-
-    // Subscribe to new messages
-    const unsubscribe = chatService.subscribeToConversation(conversationId, (newMessage) => {
-      setMessages(prev => {
-        const exists = prev.find(m => m.id === newMessage.id);
-        if (exists) return prev;
-        return [...prev, newMessage as any]; // Cast to match MessageWithSender
-      });
-      
-      // Mark as read when new message arrives
-      setTimeout(() => markAsRead(), 500);
-    });
-
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
-  }, [conversationId]);
+    // Mark messages as read when conversation opens or new messages arrive
+    if (conversationId && messages.length > 0) {
+      markAsReadMutation.mutate({ conversation_id: conversationId });
+    }
+  }, [conversationId, messages.length]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-  const loadConversation = async () => {
-    try {
-      const data = await conversationService.getConversationById(conversationId);
-      setConversation(data);
-    } catch (error) {
-      console.error('Error loading conversation:', error);
-    }
-  };
-
-  const loadMessages = async () => {
-    try {
-      setLoading(true);
-      const data = await chatService.getMessages({ conversation_id: conversationId });
-      setMessages(data);
-    } catch (error) {
-      console.error('Error loading messages:', error);
-      showError('Failed to load messages');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const markAsRead = async () => {
-    try {
-      await chatService.markAsRead({ conversation_id: conversationId });
-    } catch (error) {
-      console.error('Error marking as read:', error);
-    }
-  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -95,13 +71,12 @@ export function ChatInterface({ conversationId, onBack }: ChatInterfaceProps) {
 
   const handleSendMessage = async () => {
     const text = messageText.trim();
-    if (!text || sending) return;
+    if (!text || sendMessageMutation.isPending) return;
 
-    setSending(true);
-    setMessageText("");
+    setMessageText(""); // Clear immediately for better UX
 
     try {
-      await chatService.sendMessage({
+      await sendMessageMutation.mutateAsync({
         conversation_id: conversationId,
         content: text,
         message_type: 'text',
@@ -110,19 +85,15 @@ export function ChatInterface({ conversationId, onBack }: ChatInterfaceProps) {
       console.error('Error sending message:', error);
       showError(error.message || 'Failed to send message');
       setMessageText(text); // Restore message on error
-    } finally {
-      setSending(false);
     }
   };
 
   const handleVoiceRecorded = async (audioBlob: Blob, duration: number) => {
     try {
-      setSending(true);
-      
       const voicePath = await chatService.uploadVoiceMessage(conversationId, { blob: audioBlob, duration });
       const voiceUrl = await chatService.getVoiceMessageUrl(voicePath);
       
-      await chatService.sendMessage({
+      await sendMessageMutation.mutateAsync({
         conversation_id: conversationId,
         content: 'Voice message',
         message_type: 'voice',
@@ -135,8 +106,6 @@ export function ChatInterface({ conversationId, onBack }: ChatInterfaceProps) {
     } catch (error: any) {
       console.error('Error sending voice message:', error);
       showError(error.message || 'Failed to send voice message');
-    } finally {
-      setSending(false);
     }
   };
 
@@ -191,9 +160,17 @@ export function ChatInterface({ conversationId, onBack }: ChatInterfaceProps) {
           </div>
         </div>
 
-        <Button variant="ghost" size="sm">
-          <MoreVertical className="h-5 w-5" />
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* Listener-only actions */}
+          <ListenerChatActions
+            conversationId={conversationId}
+            isListener={profile?.account_type === 'listener'}
+          />
+
+          <Button variant="ghost" size="sm">
+            <MoreVertical className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
       {/* Messages */}
@@ -225,7 +202,7 @@ export function ChatInterface({ conversationId, onBack }: ChatInterfaceProps) {
           <VoiceRecorder
             onRecordingComplete={handleVoiceRecorded}
             onCancel={() => setShowVoiceRecorder(false)}
-            disabled={sending}
+            disabled={sendMessageMutation.isPending}
           />
         ) : (
           <div className="flex items-end gap-2">
@@ -233,7 +210,7 @@ export function ChatInterface({ conversationId, onBack }: ChatInterfaceProps) {
               variant="ghost"
               size="sm"
               onClick={() => setShowVoiceRecorder(true)}
-              disabled={sending}
+              disabled={sendMessageMutation.isPending}
               title="Record voice message"
             >
               <Mic className="h-5 w-5" />
@@ -245,15 +222,15 @@ export function ChatInterface({ conversationId, onBack }: ChatInterfaceProps) {
               onKeyPress={handleKeyPress}
               placeholder="Type a message..."
               className="min-h-[44px] max-h-32 resize-none"
-              disabled={sending}
+              disabled={sendMessageMutation.isPending}
             />
 
             <Button
               onClick={handleSendMessage}
-              disabled={!messageText.trim() || sending}
+              disabled={!messageText.trim() || sendMessageMutation.isPending}
               size="sm"
             >
-              {sending ? (
+              {sendMessageMutation.isPending ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
                 <Send className="h-5 w-5" />

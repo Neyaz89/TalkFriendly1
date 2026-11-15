@@ -9,7 +9,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Moon, Sun, Bell, Shield, Globe,
-  Download, Trash2, ChevronRight, LogOut, ArrowLeft,
+  Download, Trash2, ChevronRight, LogOut, ArrowLeft, CreditCard, Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -78,7 +78,7 @@ function SettingRow({
 
 // ─── Main view ────────────────────────────────────────────────────────────────
 export function SettingsView() {
-  const { signOut } = useAuth();
+  const { signOut, profile: authProfile } = useAuth();
   const { theme, showBorders, toggleTheme, toggleBorders } = useTheme();
   const isDark = theme === 'dark';
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -86,6 +86,8 @@ export function SettingsView() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [savedMsg, setSavedMsg] = useState("");
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
 
   const handleLogoutClick = () => {
     setShowLogoutDialog(true);
@@ -138,6 +140,38 @@ export function SettingsView() {
   const flashSaved = () => {
     setSavedMsg("Saved ✓");
     setTimeout(() => setSavedMsg(""), 2000);
+  };
+
+  const handleManageSubscription = async () => {
+    setSubscriptionLoading(true);
+    try {
+      const res = await fetch("/api/subscriptions/portal", { method: "POST" });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else alert(data.error ?? "Could not open billing portal.");
+    } catch {
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setSubscriptionLoading(false);
+    }
+  };
+
+  const handleUpgrade = async (plan: "plus" | "premium") => {
+    setCheckoutLoading(plan);
+    try {
+      const res = await fetch("/api/subscriptions/create-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan, billing: "monthly" }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else alert(data.error ?? "Could not start checkout.");
+    } catch {
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setCheckoutLoading(null);
+    }
   };
 
   const handleExport = async () => {
@@ -302,6 +336,76 @@ export function SettingsView() {
                 <option value="zh">🇨🇳 中文</option>
               </select>
             </SettingRow>
+          </CardContent>
+        </Card>
+
+        {/* ── Subscription ────────────────────────────────────────── */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <CreditCard className="h-4 w-4" />Subscription
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Current plan badge */}
+            <div className="flex items-center justify-between p-3 bg-primary-50 rounded-xl border border-primary-100">
+              <div>
+                <p className="text-sm font-semibold text-text capitalize">
+                  {authProfile?.account_type === "admin" ? "Admin" : (authProfile as any)?.subscription_tier ?? "free"} Plan
+                </p>
+                <p className="text-xs text-muted mt-0.5">
+                  {((authProfile as any)?.subscription_tier ?? "free") === "free"
+                    ? "2 free listener sessions/month"
+                    : ((authProfile as any)?.subscription_tier ?? "free") === "plus"
+                    ? "Unlimited journals & AI"
+                    : "Full access + listener sessions"}
+                </p>
+              </div>
+              <span className="text-xs font-semibold bg-primary-500 text-white px-2.5 py-1 rounded-full capitalize">
+                {((authProfile as any)?.subscription_tier ?? "free")}
+              </span>
+            </div>
+
+            {/* Upgrade options (hide if already premium) */}
+            {((authProfile as any)?.subscription_tier ?? "free") !== "premium" && (
+              <div className="space-y-2">
+                {((authProfile as any)?.subscription_tier ?? "free") === "free" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full gap-2"
+                    disabled={checkoutLoading === "plus"}
+                    onClick={() => handleUpgrade("plus")}
+                  >
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    {checkoutLoading === "plus" ? "Redirecting…" : "Upgrade to Plus — $12/mo"}
+                  </Button>
+                )}
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="w-full gap-2"
+                  disabled={checkoutLoading === "premium"}
+                  onClick={() => handleUpgrade("premium")}
+                >
+                  <Sparkles className="h-4 w-4" />
+                  {checkoutLoading === "premium" ? "Redirecting…" : "Upgrade to Premium — $39/mo"}
+                </Button>
+              </div>
+            )}
+
+            {/* Manage existing subscription */}
+            {((authProfile as any)?.subscription_tier ?? "free") !== "free" && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                disabled={subscriptionLoading}
+                onClick={handleManageSubscription}
+              >
+                {subscriptionLoading ? "Opening portal…" : "Manage Subscription / Cancel"}
+              </Button>
+            )}
           </CardContent>
         </Card>
 

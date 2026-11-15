@@ -6,6 +6,8 @@ import { UserGrowthChart } from "@/features/admin/dashboard/UserGrowthChart";
 import { RecentActivity } from "@/features/admin/dashboard/RecentActivity";
 import { PendingApplications } from "@/features/admin/dashboard/PendingApplications";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Admin Dashboard | TalkFriendly",
   description: "Platform overview and analytics",

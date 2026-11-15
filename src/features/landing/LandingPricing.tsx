@@ -2,18 +2,21 @@
 
 /**
  * Landing page pricing section.
+ * Free plan → register. Plus/Premium → Stripe Checkout.
  */
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Check, Sparkles } from "lucide-react";
+import { Check, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants";
 import { cn } from "@/lib/utils";
 
 const PLANS = [
   {
+    id: "free",
     name: "Free",
     description: "Everything you need to start your wellness journey.",
     price: { monthly: 0, annual: 0 },
@@ -26,10 +29,10 @@ const PLANS = [
       "Mood charts & history",
     ],
     cta: "Start Free",
-    href: ROUTES.REGISTER,
     highlighted: false,
   },
   {
+    id: "plus",
     name: "Plus",
     description: "For deeper healing and consistent practice.",
     price: { monthly: 12, annual: 9 },
@@ -44,11 +47,11 @@ const PLANS = [
       "Weekly AI insights report",
     ],
     cta: "Start Plus",
-    href: ROUTES.REGISTER,
     highlighted: true,
     badge: "Most Popular",
   },
   {
+    id: "premium",
     name: "Premium",
     description: "For those who want personal human support.",
     price: { monthly: 39, annual: 29 },
@@ -62,13 +65,54 @@ const PLANS = [
       "Dedicated support",
     ],
     cta: "Start Premium",
-    href: ROUTES.REGISTER,
     highlighted: false,
   },
-];
+] as const;
 
 export function LandingPricing() {
+  const router = useRouter();
   const [annual, setAnnual] = useState(true);
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  const handlePlanClick = async (planId: string) => {
+    if (planId === "free") {
+      router.push(ROUTES.REGISTER);
+      return;
+    }
+
+    setLoadingPlan(planId);
+    try {
+      const res = await fetch("/api/subscriptions/create-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          plan: planId,
+          billing: annual ? "annual" : "monthly",
+        }),
+      });
+
+      if (res.status === 401) {
+        // Not logged in — send to register, they'll subscribe from settings after
+        router.push(ROUTES.REGISTER);
+        return;
+      }
+
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else if (data.error) {
+        // Stripe prices not configured yet — fall back to register
+        console.warn("Stripe not fully configured:", data.error);
+        router.push(ROUTES.REGISTER);
+      }
+    } catch (err) {
+      console.error("Checkout error:", err);
+      router.push(ROUTES.REGISTER);
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
   return (
     <section id="pricing" className="py-20 px-4 sm:px-6" aria-label="Pricing">
@@ -116,69 +160,80 @@ export function LandingPricing() {
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-6">
-          {PLANS.map((plan, i) => (
-            <motion.div
-              key={plan.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className={cn(
-                "relative rounded-2xl p-6 border",
-                plan.highlighted
-                  ? "border-primary-300 shadow-large bg-primary-50"
-                  : "border-border shadow-card bg-white"
-              )}
-            >
-              {plan.badge && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-primary-500 text-white text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
-                    <Sparkles className="h-3 w-3" />
-                    {plan.badge}
-                  </span>
-                </div>
-              )}
-
-              <div className="mb-6">
-                <h3 className="text-lg font-bold text-text mb-1">{plan.name}</h3>
-                <p className="text-sm text-muted">{plan.description}</p>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold text-text">
-                    ${annual ? plan.price.annual : plan.price.monthly}
-                  </span>
-                  {plan.price.monthly > 0 && (
-                    <span className="text-muted text-sm ml-1">/month</span>
-                  )}
-                  {annual && plan.price.monthly > 0 && (
-                    <p className="text-xs text-muted mt-1">Billed annually</p>
-                  )}
-                </div>
-              </div>
-
-              <ul className="space-y-3 mb-8" role="list">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2.5 text-sm">
-                    <Check
-                      className={cn(
-                        "h-4 w-4 shrink-0 mt-0.5",
-                        plan.highlighted ? "text-primary-500" : "text-green-500"
-                      )}
-                      aria-hidden="true"
-                    />
-                    <span className="text-text">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                variant={plan.highlighted ? "default" : "outline"}
-                className="w-full"
-                asChild
+          {PLANS.map((plan, i) => {
+            const isLoading = loadingPlan === plan.id;
+            return (
+              <motion.div
+                key={plan.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className={cn(
+                  "relative rounded-2xl p-6 border",
+                  plan.highlighted
+                    ? "border-primary-300 shadow-large bg-primary-50"
+                    : "border-border shadow-card bg-white"
+                )}
               >
-                <Link href={plan.href}>{plan.cta}</Link>
-              </Button>
-            </motion.div>
-          ))}
+                {'badge' in plan && plan.badge && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="bg-primary-500 text-white text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
+                      <Sparkles className="h-3 w-3" />
+                      {plan.badge}
+                    </span>
+                  </div>
+                )}
+
+                <div className="mb-6">
+                  <h3 className="text-lg font-bold text-text mb-1">{plan.name}</h3>
+                  <p className="text-sm text-muted">{plan.description}</p>
+                  <div className="mt-4">
+                    <span className="text-4xl font-bold text-text">
+                      ${annual ? plan.price.annual : plan.price.monthly}
+                    </span>
+                    {plan.price.monthly > 0 && (
+                      <span className="text-muted text-sm ml-1">/month</span>
+                    )}
+                    {annual && plan.price.monthly > 0 && (
+                      <p className="text-xs text-muted mt-1">Billed annually</p>
+                    )}
+                  </div>
+                </div>
+
+                <ul className="space-y-3 mb-8" role="list">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-2.5 text-sm">
+                      <Check
+                        className={cn(
+                          "h-4 w-4 shrink-0 mt-0.5",
+                          plan.highlighted ? "text-primary-500" : "text-green-500"
+                        )}
+                        aria-hidden="true"
+                      />
+                      <span className="text-text">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Button
+                  variant={plan.highlighted ? "default" : "outline"}
+                  className="w-full"
+                  disabled={isLoading}
+                  onClick={() => handlePlanClick(plan.id)}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Redirecting…
+                    </>
+                  ) : (
+                    plan.cta
+                  )}
+                </Button>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>

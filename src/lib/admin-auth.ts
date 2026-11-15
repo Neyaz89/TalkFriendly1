@@ -182,7 +182,7 @@ export async function getCurrentAdmin(): Promise<AdminUser | null> {
  * Get current admin user (server-side)
  */
 export async function getCurrentAdminServer(): Promise<AdminUser | null> {
-  const supabase = await createServerClient();
+  const supabase = createClient();
 
   try {
     const { data: { user } } = await supabase.auth.getUser();
@@ -243,7 +243,7 @@ export function hasAllPermissions(admin: AdminUser, permissions: string[]): bool
  * Validate admin session (server-side)
  */
 export async function validateAdminSession(sessionToken: string): Promise<AdminUser | null> {
-  const supabase = await createServerClient();
+  const supabase = createClient();
 
   try {
     // Get session

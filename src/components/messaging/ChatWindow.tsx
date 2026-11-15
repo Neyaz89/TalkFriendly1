@@ -269,7 +269,7 @@ export default function ChatWindow({
                 const sender = message.sender;
 
                 // Handle special message type: session_booking_form
-                if (message.message_type === 'session_booking_form') {
+                if ((message.message_type as string) === 'session_booking_form') {
                   try {
                     const payload = JSON.parse(message.content || '{}');
                     return (

@@ -16,6 +16,7 @@ const badgeVariants = cva(
         success: "bg-green-100 text-green-700",
         warning: "bg-amber-100 text-amber-700",
         danger: "bg-red-100 text-red-600",
+        destructive: "bg-red-100 text-red-600",
         outline: "border border-border text-muted bg-transparent",
         // Mood variants
         "mood-1": "bg-red-100 text-red-700",

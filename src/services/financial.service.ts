@@ -93,8 +93,8 @@ export const financialService = {
     useServerClient: boolean = true
   ): Promise<SessionFinancial> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     const {
       data: { user },
@@ -141,8 +141,8 @@ export const financialService = {
     useServerClient: boolean = true
   ): Promise<SessionFinancial> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     const {
       data: { user },
@@ -195,8 +195,8 @@ export const financialService = {
     useServerClient: boolean = true
   ): Promise<SessionFinancial | null> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     const { data, error } = await supabase
       .from('session_financials')
@@ -219,8 +219,8 @@ export const financialService = {
     useServerClient: boolean = true
   ): Promise<SessionFinancial> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     // Get current financial record
     const financial = await this.getSessionFinancials(appointmentId, useServerClient);
@@ -268,8 +268,8 @@ export const financialService = {
     useServerClient: boolean = true
   ): Promise<CommissionLedgerEntry> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     const {
       data: { user },
@@ -308,8 +308,8 @@ export const financialService = {
     useServerClient: boolean = true
   ): Promise<{ entries: CommissionLedgerEntry[]; total: number }> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     let query = supabase
       .from('commission_ledger')
@@ -368,8 +368,8 @@ export const financialService = {
     useServerClient: boolean = true
   ): Promise<PsychiatristEarnings> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     const fromDate = params.from_date || new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString();
     const toDate = params.to_date || new Date().toISOString();
@@ -459,8 +459,8 @@ export const financialService = {
     useServerClient: boolean = true
   ): Promise<PsychiatristPayoutHistory> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     // Get all completed payouts
     const { data: financials } = await supabase
@@ -520,8 +520,8 @@ export const financialService = {
     useServerClient: boolean = true
   ): Promise<{ payout_transaction_id: string; amount: number }> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     // Calculate total payout amount
     const { data: financials } = await supabase
@@ -592,8 +592,8 @@ export const financialService = {
     useServerClient: boolean = true
   ): Promise<PlatformFinancialOverview> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     // Get all sessions in period
     const { data: appointments } = await supabase
@@ -711,8 +711,8 @@ export const financialService = {
     useServerClient: boolean = true
   ): Promise<SessionFinancial> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     const financial = await this.getSessionFinancials(appointmentId, useServerClient);
     if (!financial) {
@@ -761,8 +761,8 @@ export const financialService = {
     useServerClient: boolean = true
   ): Promise<SessionFinancial> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     const updated = await this.updateSessionFinancials(
       appointmentId,
@@ -799,8 +799,8 @@ export const financialService = {
     useServerClient: boolean = true
   ): Promise<Dispute> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     const {
       data: { user },

@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ApplicationReview } from "@/features/admin/listener-applications/ApplicationReview";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Review Application | Admin",
   description: "Review listener application details",

@@ -13,6 +13,7 @@ interface DropdownMenuTriggerProps {
 
 interface DropdownMenuContentProps {
   align?: "start" | "center" | "end";
+  className?: string;
   children: React.ReactNode;
 }
 
@@ -20,6 +21,7 @@ interface DropdownMenuItemProps {
   onClick?: () => void;
   children: React.ReactNode;
   disabled?: boolean;
+  className?: string;
 }
 
 const DropdownMenuContext = React.createContext<{
@@ -61,6 +63,7 @@ export function DropdownMenuTrigger({
 
 export function DropdownMenuContent({
   align = "end",
+  className,
   children,
 }: DropdownMenuContentProps) {
   const { open, setOpen } = React.useContext(DropdownMenuContext);
@@ -92,7 +95,7 @@ export function DropdownMenuContent({
   return (
     <div
       ref={ref}
-      className={`absolute z-50 mt-2 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-1 shadow-md ${alignmentClasses[align]}`}
+      className={`absolute z-50 mt-2 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-1 shadow-md ${alignmentClasses[align]} ${className ?? ""}`}
     >
       {children}
     </div>
@@ -103,6 +106,7 @@ export function DropdownMenuItem({
   onClick,
   children,
   disabled = false,
+  className,
 }: DropdownMenuItemProps) {
   const { setOpen } = React.useContext(DropdownMenuContext);
 
@@ -125,7 +129,7 @@ export function DropdownMenuItem({
             ? "opacity-50 cursor-not-allowed"
             : "hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700"
         }
-        text-gray-900 dark:text-white
+        text-gray-900 dark:text-white ${className ?? ""}
       `}
     >
       {children}

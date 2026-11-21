@@ -85,8 +85,8 @@ export const appointmentService = {
     useServerClient: boolean = false
   ): Promise<CreateAppointmentResponse> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     // Get current user
     const {
@@ -194,8 +194,8 @@ export const appointmentService = {
     useServerClient: boolean = false
   ): Promise<CreateAppointmentResponse> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     // Get current user
     const {
@@ -308,8 +308,8 @@ export const appointmentService = {
     useServerClient: boolean = false
   ): Promise<AppointmentListResponse> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     const {
       data: { user },
@@ -388,8 +388,8 @@ export const appointmentService = {
     useServerClient: boolean = false
   ): Promise<AppointmentWithDetails> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     const { data, error } = await supabase
       .from('appointments')
@@ -422,8 +422,8 @@ export const appointmentService = {
     useServerClient: boolean = false
   ): Promise<Appointment> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     const {
       data: { user },
@@ -456,8 +456,8 @@ export const appointmentService = {
     useServerClient: boolean = false
   ): Promise<Appointment> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     const {
       data: { user },
@@ -493,8 +493,8 @@ export const appointmentService = {
     useServerClient: boolean = false
   ): Promise<boolean> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     // Check for any active or upcoming sessions
     const { data, error } = await supabase
@@ -523,8 +523,8 @@ export const appointmentService = {
     useServerClient: boolean = false
   ): Promise<boolean> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     const { data, error } = await supabase
       .from('appointments')
@@ -555,8 +555,8 @@ export const appointmentService = {
     useServerClient: boolean = false
   ): Promise<AvailableSlotsResponse> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     // Call database function to get available slots
     const { data, error } = await supabase.rpc('get_available_slots', {
@@ -589,8 +589,8 @@ export const appointmentService = {
     useServerClient: boolean = false
   ): Promise<PsychiatristAvailability> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     const {
       data: { user },
@@ -630,8 +630,8 @@ export const appointmentService = {
     useServerClient: boolean = false
   ): Promise<PsychiatristAvailability> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     const {
       data: { user },
@@ -664,8 +664,8 @@ export const appointmentService = {
     useServerClient: boolean = false
   ): Promise<PsychiatristAvailability[]> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     const { data, error } = await supabase
       .from('psychiatrist_availability')

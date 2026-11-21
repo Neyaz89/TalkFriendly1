@@ -38,8 +38,8 @@ export const attendanceService = {
     useServerClient: boolean = true
   ): Promise<ProcessWebhookResponse> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     const errors: string[] = [];
     let appointmentId: string | null = null;
@@ -155,8 +155,8 @@ export const attendanceService = {
     useServerClient: boolean = true
   ): Promise<void> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     // Store attendance event
     await this.storeAttendanceEvent({
@@ -197,8 +197,8 @@ export const attendanceService = {
     useServerClient: boolean = true
   ): Promise<void> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     // Store attendance event
     await this.storeAttendanceEvent({
@@ -242,8 +242,8 @@ export const attendanceService = {
     useServerClient: boolean = true
   ): Promise<void> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     // Extract participant info
     const participantId = eventData.participant?.split('/').pop() || 'unknown';
@@ -276,8 +276,8 @@ export const attendanceService = {
     useServerClient: boolean = true
   ): Promise<void> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     const participantId = eventData.participant?.split('/').pop() || 'unknown';
     const sessionId = eventData.participantSession?.split('/').pop() || null;
@@ -323,8 +323,8 @@ export const attendanceService = {
     useServerClient: boolean = true
   ): Promise<AttendanceEvent | null> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     // Check if event already exists (idempotent)
     const { data: existing } = await supabase
@@ -380,8 +380,8 @@ export const attendanceService = {
     useServerClient: boolean = true
   ): Promise<void> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     // Get attendance event
     const { data: event } = await supabase
@@ -478,8 +478,8 @@ export const attendanceService = {
     useServerClient: boolean = true
   ): Promise<ReconciliationResult> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     const result: ReconciliationResult = {
       appointment_id: request.appointment_id,
@@ -594,8 +594,8 @@ export const attendanceService = {
     useServerClient: boolean = true
   ): Promise<BillableDurationCalculation> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     // Get all participant sessions
     const { data: sessions } = await supabase
@@ -701,8 +701,8 @@ export const attendanceService = {
     useServerClient: boolean = true
   ): Promise<ParticipantMappingResult> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     // Get appointment participants
     const { data: appointmentRaw2 } = await supabase
@@ -781,8 +781,8 @@ export const attendanceService = {
     useServerClient: boolean = true
   ): Promise<void> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     await supabase
       .from('google_meet_conferences')
@@ -827,8 +827,8 @@ export const attendanceService = {
     total_events: number;
   }> {
     const supabase = useServerClient
-      ? await createServerClient()
-      : createBrowserClient();
+      ? createClient()
+      : createClient();
 
     const { data: sessions } = await supabase
       .from('participant_sessions')

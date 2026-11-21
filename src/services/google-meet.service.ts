@@ -53,7 +53,10 @@ export const videoService = {
     error?: string;
   }> {
     const validation = validateMeetingUrl(url);
-    return validation;
+    return {
+      ...validation,
+      provider: validation.provider ?? undefined,
+    };
   },
 
   /**

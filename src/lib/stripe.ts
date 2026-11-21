@@ -42,11 +42,12 @@ export const STRIPE_PRICES = {
   premium_annual: process.env.STRIPE_PRICE_PREMIUM_ANNUAL ?? '',
 } as const;
 
-// ── Session pricing (must match appointment.service.ts) ──────────────────────
+// ── Session pricing (must match constants/index.ts SESSION_DURATIONS) ────────
 // Values are in cents (USD).
 
-export const SESSION_PRICES_CENTS: Record<15 | 30 | 60, number> = {
+export const SESSION_PRICES_CENTS: Record<15 | 30 | 45 | 60, number> = {
   15: parseInt(process.env.SESSION_PRICE_15_MIN ?? '1500', 10),
   30: parseInt(process.env.SESSION_PRICE_30_MIN ?? '3000', 10),
+  45: parseInt(process.env.SESSION_PRICE_45_MIN ?? '4500', 10),
   60: parseInt(process.env.SESSION_PRICE_60_MIN ?? '6000', 10),
 };

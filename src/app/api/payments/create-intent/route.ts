@@ -42,12 +42,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const durationKey = duration as 15 | 30 | 60;
+    const durationKey = duration as 15 | 30 | 45 | 60;
     const amountCents = SESSION_PRICES_CENTS[durationKey];
 
     if (!amountCents) {
       return NextResponse.json(
-        { error: `Unsupported duration: ${duration}. Must be 15, 30, or 60.` },
+        { error: `Unsupported duration: ${duration}. Must be 15, 30, 45, or 60.` },
         { status: 400 }
       );
     }

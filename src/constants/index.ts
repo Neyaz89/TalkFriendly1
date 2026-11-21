@@ -114,7 +114,7 @@ export const PAGINATION = {
   LISTENERS_LIMIT: 12,
 } as const;
 
-export const SESSION_DURATIONS = [30, 45, 60] as const;
+export const SESSION_DURATIONS = [15, 30, 45, 60] as const;
 
 export const CHART_COLORS = {
   mood: "#E97C5A",

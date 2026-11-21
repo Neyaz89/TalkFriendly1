@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
     // Send notification to listener
     await supabase.from('notifications').insert({
       user_id: listenerId,
-      notification_type: 'booking',
+      notification_type: 'message',
       title: 'New Paid Session Booking',
       message: `You have a new confirmed session booking`,
       data: {

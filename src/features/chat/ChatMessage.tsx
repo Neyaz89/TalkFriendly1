@@ -8,7 +8,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatDistanceToNow, format } from "date-fns";
 import { VoiceMessagePlayer } from "./VoiceMessagePlayer";
-import { Check, CheckCheck, FileText, MessageSquareStar, AlertCircle } from "lucide-react";
+import { Check, CheckCheck, FileText, MessageSquareShare, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { UserRoleBadge } from "@/components/ui/user-role-badge";
@@ -144,7 +144,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
           <>
             <Card className={`p-4 ${isOwnMessage ? 'bg-primary-50 dark:bg-primary-900/20' : ''}`}>
               <div className="flex items-start gap-3">
-                <MessageSquareStar className="h-5 w-5 text-primary-500 flex-shrink-0 mt-0.5" />
+                <MessageSquareShare className="h-5 w-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <div className="flex-1 min-w-0">
                   <h4 className="font-semibold text-sm mb-1">Feedback Request</h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">

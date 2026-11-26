@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (body.left_at) {
-      updateData.left_at = leftAt.toISOString();
+      updateData.left_at = leftAt?.toISOString();
     }
 
     if (durationSeconds !== null) {

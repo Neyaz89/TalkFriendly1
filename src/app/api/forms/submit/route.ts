@@ -163,11 +163,11 @@ export async function POST(request: NextRequest) {
       .from('notifications')
       .insert({
         user_id: listenerId,
-        type: 'form_submission',
+        notification_type: 'message',
         title: 'New Form Submission',
         message: `Someone submitted your form: "${form?.title || 'Untitled Form'}"`,
-        action_url: `/messages/${message.conversation_id}`,
-        metadata: {
+        link: `/messages?conversation=${message.conversation_id}`,
+        data: {
           form_id: body.form_id,
           submission_id: submission.id,
           message_id: body.message_id,

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { ApplicationsList } from "@/features/admin/listener-applications/ApplicationsList";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Listener Applications | Admin",
   description: "Review and manage listener applications",

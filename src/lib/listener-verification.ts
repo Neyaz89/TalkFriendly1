@@ -51,7 +51,7 @@ export async function checkListenerVerification(userId: string): Promise<Verific
  * Check if a listener is verified and can accept bookings (server-side)
  */
 export async function checkListenerVerificationServer(userId: string): Promise<VerificationCheckResult> {
-  const supabase = await createServerClient();
+  const supabase = createClient();
 
   const { data: listener, error } = await supabase
     .from('listeners')

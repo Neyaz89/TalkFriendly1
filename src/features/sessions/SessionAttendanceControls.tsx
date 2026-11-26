@@ -72,7 +72,7 @@ export function SessionAttendanceControls({
   };
 
   // Check out
-  const handleCheckOut = async () {
+  const handleCheckOut = async () => {
     setActionInProgress(true);
     try {
       const response = await fetch('/api/sessions/check-out', {
